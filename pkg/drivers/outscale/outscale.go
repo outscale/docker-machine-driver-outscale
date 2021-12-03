@@ -217,11 +217,6 @@ func (d *OscDriver) GetState() (state.State, error) {
 	}
 }
 
-// Kill stops a host forcefully
-func (d *OscDriver) Kill() error {
-	return nil
-}
-
 // PreCreateCheck allows for pre-create operations to make sure a driver is ready for creation
 func (d *OscDriver) PreCreateCheck() error {
 	return nil
@@ -284,8 +279,7 @@ func (d *OscDriver) Start() error {
 
 }
 
-// Stop a host gracefully
-func (d *OscDriver) Stop() error {
+func (d *OscDriver) innerStop(force bool) error {
 	oscApi, err := d.getClient()
 	if err != nil {
 		return err
@@ -296,6 +290,7 @@ func (d *OscDriver) Stop() error {
 			d.vmId,
 		},
 	}
+	request.SetForceStop(force)
 
 	_, httpRes, err := oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
 	if err != nil {
@@ -311,4 +306,14 @@ func (d *OscDriver) Stop() error {
 	}
 
 	return nil
+}
+
+// Stop a host gracefully
+func (d *OscDriver) Stop() error {
+	return d.innerStop(false)
+}
+
+// Kill stops a host forcefully
+func (d *OscDriver) Kill() error {
+	return d.innerStop(true)
 }

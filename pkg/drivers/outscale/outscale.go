@@ -256,7 +256,32 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 
 // Start a host
 func (d *OscDriver) Start() error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.StartVmsRequest{
+		VmIds: []string{
+			d.vmId,
+		},
+	}
+
+	_, httpRes, err := oscApi.client.VmApi.StartVms(oscApi.context).StartVmsRequest(request).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the StartVm request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if err := d.waitForState(d.vmId, "running"); err != nil {
+		return err
+	}
+
 	return nil
+
 }
 
 // Stop a host gracefully

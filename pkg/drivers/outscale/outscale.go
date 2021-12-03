@@ -177,7 +177,44 @@ func (d *OscDriver) GetURL() (string, error) {
 
 // GetState returns the state that the host is in (running, stopped, etc)
 func (d *OscDriver) GetState() (state.State, error) {
-	return state.None, nil
+	oscApi, err := d.getClient()
+	if err != nil {
+		return state.None, err
+	}
+
+	readVmRequest := osc.ReadVmsRequest{
+		Filters: &osc.FiltersVm{
+			VmIds: &[]string{
+				d.vmId,
+			},
+		},
+	}
+
+	readVmResponse, httpRes, err := oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the Vm creation request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return state.None, err
+	}
+
+	if !readVmResponse.HasVms() {
+		return state.None, errors.New("Error while reading the VM: there is no VM")
+	}
+
+	switch vmState := readVmResponse.GetVms()[0].GetState(); vmState {
+	case "pending":
+		return state.Starting, nil
+	case "running":
+		return state.Running, nil
+	case "stopping", "shutting-down":
+		return state.Stopping, nil
+	case "stopped", "terminated", "quarantine":
+		return state.Stopped, nil
+	default:
+		return state.None, nil
+	}
 }
 
 // Kill stops a host forcefully

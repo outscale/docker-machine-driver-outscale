@@ -3,6 +3,7 @@ package outscale
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/mcnflag"
@@ -23,6 +24,8 @@ type OscDriver struct {
 	ak     string
 	sk     string
 	region string
+
+	vmId string
 }
 
 type OscApiData struct {
@@ -68,6 +71,45 @@ func (d *OscDriver) getClient() (*OscApiData, error) {
 // Create a host using the driver's config
 func (d *OscDriver) Create() error {
 
+	// Get the client
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	// (TODO) Create a keypair
+
+	// (TODO) Create a SG
+
+	// (TODO) Assign an Public IP
+
+	// Create an Instance
+	createVmRequest := osc.CreateVmsRequest{
+		ImageId: defaultOScOMI,
+	}
+
+	createVmResponse, httpRes, err := oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the Vm creation request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if !createVmResponse.HasVms() || len(createVmResponse.GetVms()) != 1 {
+		return errors.New("Error while creating the Vm: the number of VM created is wrong")
+	}
+
+	// Store the VM Id
+	d.vmId = createVmResponse.GetVms()[0].GetVmId()
+
+	// Wait for the VM to be started
+	fmt.Println("Waiting for the Vm to be running...")
+	if err := d.waitForState(d.vmId, "running"); err != nil {
+		return errors.New("Error while waiting that the VM is running")
+	}
+
 	return nil
 }
 
@@ -103,7 +145,7 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 
 // GetMachineName returns the name of the machine
 func (d *OscDriver) GetMachineName() string {
-	return ""
+	return d.vmId
 }
 
 // GetIP returns an IP or hostname that this host is available at

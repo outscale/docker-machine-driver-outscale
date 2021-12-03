@@ -219,7 +219,24 @@ func (d *OscDriver) GetState() (state.State, error) {
 
 // PreCreateCheck allows for pre-create operations to make sure a driver is ready for creation
 func (d *OscDriver) PreCreateCheck() error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.ReadAccountsRequest{}
+
+	_, httpRes, err := oscApi.client.AccountApi.ReadAccounts(oscApi.context).ReadAccountsRequest(request).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the ReadAcoount request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
 	return nil
+
 }
 
 // Remove a host

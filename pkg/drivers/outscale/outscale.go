@@ -224,6 +224,30 @@ func (d *OscDriver) PreCreateCheck() error {
 
 // Remove a host
 func (d *OscDriver) Remove() error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.DeleteVmsRequest{
+		VmIds: []string{
+			d.vmId,
+		},
+	}
+
+	_, httpRes, err := oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the DeleteVm request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if err := d.waitForState(d.vmId, "terminated"); err != nil {
+		return err
+	}
+
 	return nil
 }
 

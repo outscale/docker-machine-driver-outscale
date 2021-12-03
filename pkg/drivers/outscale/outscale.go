@@ -230,6 +230,30 @@ func (d *OscDriver) Remove() error {
 // Restart a host. This may just call Stop(); Start() if the provider does not
 // have any special restart behaviour.
 func (d *OscDriver) Restart() error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.RebootVmsRequest{
+		VmIds: []string{
+			d.vmId,
+		},
+	}
+
+	_, httpRes, err := oscApi.client.VmApi.RebootVms(oscApi.context).RebootVmsRequest(request).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the RebootVm request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if err := d.waitForState(d.vmId, "running"); err != nil {
+		return err
+	}
+
 	return nil
 }
 

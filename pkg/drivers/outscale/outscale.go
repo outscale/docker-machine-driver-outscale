@@ -2,18 +2,27 @@ package outscale
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"time"
 
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/mcnflag"
+	"github.com/docker/machine/libmachine/ssh"
 	"github.com/docker/machine/libmachine/state"
 	osc "github.com/outscale/osc-sdk-go/v2"
 )
 
 const (
-	defaultOscRegion = "eu-west-2"
-	defaultOScOMI    = "ami-504e6b16" // Debian
+	defaultOscRegion   = "eu-west-2"
+	defaultOScOMI      = "ami-504e6b16" // Debian
+	defaultDockerPort  = 2376
+	defaultSSHPort     = 22
+	defaultSSHUsername = "outscale"
+	defaultKeyPairPath = "/tmp/keypair"
 )
 
 type OscDriver struct {
@@ -25,7 +34,8 @@ type OscDriver struct {
 	sk     string
 	region string
 
-	vmId string
+	VmId        string
+	keypairName string
 }
 
 type OscApiData struct {
@@ -68,8 +78,65 @@ func (d *OscDriver) getClient() (*OscApiData, error) {
 
 }
 
+// Create a SSH key for the VM
+func (d *OscDriver) createSSHKey() (string, error) {
+	if err := ssh.GenerateSSHKey(d.GetSSHKeyPath()); err != nil {
+		return "", err
+	}
+
+	publicKey, err := ioutil.ReadFile(d.publicSSHKeyPath())
+	if err != nil {
+		return "", err
+	}
+
+	return string(publicKey), nil
+}
+
+// publicSSHKeyPath is always SSH Key Path appended with ".pub"
+func (d *OscDriver) publicSSHKeyPath() string {
+	return d.GetSSHKeyPath() + ".pub"
+}
+
+// Create a Keypair for the VM
+func createKeyPair(d *OscDriver) error {
+
+	publicKey, err := d.createSSHKey()
+	if err != nil {
+		return nil
+	}
+
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	d.keypairName = fmt.Sprintf("docker-machine-%s-%d", d.GetMachineName(), time.Now().Unix())
+
+	request := osc.CreateKeypairRequest{
+		KeypairName: d.keypairName,
+	}
+	request.SetPublicKey(base64.StdEncoding.EncodeToString([]byte(publicKey)))
+
+	response, httpRes, err := oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
+	if err != nil {
+		log.Error("Error while submitting the Keypair creation request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if !response.HasKeypair() {
+		return errors.New("Error while creating the keypair: the response contains nothing")
+	}
+
+	return nil
+
+}
+
 // Create a host using the driver's config
 func (d *OscDriver) Create() error {
+	log.Debug("Creating a Vm")
 
 	// Get the client
 	oscApi, err := d.getClient()
@@ -78,6 +145,9 @@ func (d *OscDriver) Create() error {
 	}
 
 	// (TODO) Create a keypair
+	if err := createKeyPair(d); err != nil {
+		return err
+	}
 
 	// (TODO) Create a SG
 
@@ -85,12 +155,13 @@ func (d *OscDriver) Create() error {
 
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
-		ImageId: defaultOScOMI,
+		ImageId:     defaultOScOMI,
+		KeypairName: &d.keypairName,
 	}
 
 	createVmResponse, httpRes, err := oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
 	if err != nil {
-		fmt.Printf("Error while submitting the Vm creation request: ")
+		log.Error("Error while submitting the Vm creation request: ")
 		if httpRes != nil {
 			fmt.Printf(httpRes.Status)
 		}
@@ -102,11 +173,11 @@ func (d *OscDriver) Create() error {
 	}
 
 	// Store the VM Id
-	d.vmId = createVmResponse.GetVms()[0].GetVmId()
+	d.VmId = createVmResponse.GetVms()[0].GetVmId()
 
 	// Wait for the VM to be started
-	fmt.Println("Waiting for the Vm to be running...")
-	if err := d.waitForState(d.vmId, "running"); err != nil {
+	log.Debug("Waiting for the Vm to be running...")
+	if err := d.waitForState(d.VmId, "running"); err != nil {
 		return errors.New("Error while waiting that the VM is running")
 	}
 
@@ -143,36 +214,38 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	}
 }
 
-// GetMachineName returns the name of the machine
-func (d *OscDriver) GetMachineName() string {
-	return d.vmId
-}
-
 // GetIP returns an IP or hostname that this host is available at
 // e.g. 1.2.3.4 or docker-host-d60b70a14d3a.cloudapp.net
+func (d *OscDriver) GetIP() (string, error) {
+	if d.IPAddress == "" {
+		return "", errors.New("IP address is not set")
+	}
+	return d.IPAddress, nil
+}
+
 func (d *OscDriver) GetSSHHostname() (string, error) {
-	return "", nil
+	return d.IPAddress, nil
 }
 
 // GetSSHKeyPath returns key path for use with ssh
 func (d *OscDriver) GetSSHKeyPath() string {
-	return ""
+	return fmt.Sprintf("/tmp/%s", d.GetMachineName())
 }
 
 // GetSSHPort returns port for use with ssh
 func (d *OscDriver) GetSSHPort() (int, error) {
-	return -1, nil
+	return defaultSSHPort, nil
 }
 
 // GetSSHUsername returns username for use with ssh
 func (d *OscDriver) GetSSHUsername() string {
-	return ""
+	return defaultSSHUsername
 }
 
 // GetURL returns a Docker compatible host URL for connecting to this host
 // e.g. tcp://1.2.3.4:2376
 func (d *OscDriver) GetURL() (string, error) {
-	return "", nil
+	return fmt.Sprintf("tcp://%s:%d", d.IPAddress, defaultDockerPort), nil
 }
 
 // GetState returns the state that the host is in (running, stopped, etc)
@@ -185,7 +258,7 @@ func (d *OscDriver) GetState() (state.State, error) {
 	readVmRequest := osc.ReadVmsRequest{
 		Filters: &osc.FiltersVm{
 			VmIds: &[]string{
-				d.vmId,
+				d.VmId,
 			},
 		},
 	}
@@ -248,7 +321,7 @@ func (d *OscDriver) Remove() error {
 
 	request := osc.DeleteVmsRequest{
 		VmIds: []string{
-			d.vmId,
+			d.VmId,
 		},
 	}
 
@@ -261,7 +334,7 @@ func (d *OscDriver) Remove() error {
 		return err
 	}
 
-	if err := d.waitForState(d.vmId, "terminated"); err != nil {
+	if err := d.waitForState(d.VmId, "terminated"); err != nil {
 		return err
 	}
 
@@ -278,7 +351,7 @@ func (d *OscDriver) Restart() error {
 
 	request := osc.RebootVmsRequest{
 		VmIds: []string{
-			d.vmId,
+			d.VmId,
 		},
 	}
 
@@ -291,7 +364,7 @@ func (d *OscDriver) Restart() error {
 		return err
 	}
 
-	if err := d.waitForState(d.vmId, "running"); err != nil {
+	if err := d.waitForState(d.VmId, "running"); err != nil {
 		return err
 	}
 
@@ -323,7 +396,7 @@ func (d *OscDriver) Start() error {
 
 	request := osc.StartVmsRequest{
 		VmIds: []string{
-			d.vmId,
+			d.VmId,
 		},
 	}
 
@@ -336,7 +409,7 @@ func (d *OscDriver) Start() error {
 		return err
 	}
 
-	if err := d.waitForState(d.vmId, "running"); err != nil {
+	if err := d.waitForState(d.VmId, "running"); err != nil {
 		return err
 	}
 
@@ -352,7 +425,7 @@ func (d *OscDriver) innerStop(force bool) error {
 
 	request := osc.StopVmsRequest{
 		VmIds: []string{
-			d.vmId,
+			d.VmId,
 		},
 	}
 	request.SetForceStop(force)
@@ -366,7 +439,7 @@ func (d *OscDriver) innerStop(force bool) error {
 		return err
 	}
 
-	if err := d.waitForState(d.vmId, "stopped"); err != nil {
+	if err := d.waitForState(d.VmId, "stopped"); err != nil {
 		return err
 	}
 

@@ -286,5 +286,29 @@ func (d *OscDriver) Start() error {
 
 // Stop a host gracefully
 func (d *OscDriver) Stop() error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.StopVmsRequest{
+		VmIds: []string{
+			d.vmId,
+		},
+	}
+
+	_, httpRes, err := oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the StopVm request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if err := d.waitForState(d.vmId, "stopped"); err != nil {
+		return err
+	}
+
 	return nil
 }

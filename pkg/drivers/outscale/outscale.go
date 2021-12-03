@@ -181,6 +181,30 @@ func (d *OscDriver) Create() error {
 		return errors.New("Error while waiting that the VM is running")
 	}
 
+	// Retrieve the Public IP
+	readVmRequest := osc.ReadVmsRequest{
+		Filters: &osc.FiltersVm{
+			VmIds: &[]string{
+				d.VmId,
+			},
+		},
+	}
+
+	response, httpRes, err := oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+	if err != nil {
+		fmt.Printf("Error while submitting the Vm creation request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	if !response.HasVms() {
+		return errors.New("Error while reading the VM: there is no VM")
+	}
+
+	d.IPAddress = response.GetVms()[0].GetPublicIp()
+
 	return nil
 }
 

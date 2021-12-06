@@ -2,16 +2,12 @@ package outscale
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"time"
 
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/mcnflag"
-	"github.com/docker/machine/libmachine/ssh"
 	"github.com/docker/machine/libmachine/state"
 	osc "github.com/outscale/osc-sdk-go/v2"
 )
@@ -78,62 +74,6 @@ func (d *OscDriver) getClient() (*OscApiData, error) {
 
 }
 
-// Create a SSH key for the VM
-func (d *OscDriver) createSSHKey() (string, error) {
-	if err := ssh.GenerateSSHKey(d.GetSSHKeyPath()); err != nil {
-		return "", err
-	}
-
-	publicKey, err := ioutil.ReadFile(d.publicSSHKeyPath())
-	if err != nil {
-		return "", err
-	}
-
-	return string(publicKey), nil
-}
-
-// publicSSHKeyPath is always SSH Key Path appended with ".pub"
-func (d *OscDriver) publicSSHKeyPath() string {
-	return d.GetSSHKeyPath() + ".pub"
-}
-
-// Create a Keypair for the VM
-func createKeyPair(d *OscDriver) error {
-
-	publicKey, err := d.createSSHKey()
-	if err != nil {
-		return nil
-	}
-
-	oscApi, err := d.getClient()
-	if err != nil {
-		return err
-	}
-
-	d.keypairName = fmt.Sprintf("docker-machine-%s-%d", d.GetMachineName(), time.Now().Unix())
-
-	request := osc.CreateKeypairRequest{
-		KeypairName: d.keypairName,
-	}
-	request.SetPublicKey(base64.StdEncoding.EncodeToString([]byte(publicKey)))
-
-	response, httpRes, err := oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
-	if err != nil {
-		log.Error("Error while submitting the Keypair creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
-	}
-
-	if !response.HasKeypair() {
-		return errors.New("Error while creating the keypair: the response contains nothing")
-	}
-
-	return nil
-
-}
-
 // Create a host using the driver's config
 func (d *OscDriver) Create() error {
 	log.Debug("Creating a Vm")
@@ -144,7 +84,7 @@ func (d *OscDriver) Create() error {
 		return err
 	}
 
-	// (TODO) Create a keypair
+	// Create a keypair
 	if err := createKeyPair(d); err != nil {
 		return err
 	}
@@ -156,7 +96,7 @@ func (d *OscDriver) Create() error {
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
 		ImageId:     defaultOScOMI,
-		KeypairName: &d.keypairName,
+		KeypairName: &d.KeypairName,
 	}
 
 	createVmResponse, httpRes, err := oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()

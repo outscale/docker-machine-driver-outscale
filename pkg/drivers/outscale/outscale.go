@@ -32,6 +32,7 @@ type OscDriver struct {
 
 	VmId            string
 	KeypairName     string
+	SecurityGroupId string
 }
 
 type OscApiData struct {
@@ -89,7 +90,10 @@ func (d *OscDriver) Create() error {
 		return err
 	}
 
-	// (TODO) Create a SG
+	// Create a SG
+	if err := createSecurityGroup(d); err != nil {
+		return err
+	}
 
 	// (TODO) Assign an Public IP
 
@@ -97,6 +101,9 @@ func (d *OscDriver) Create() error {
 	createVmRequest := osc.CreateVmsRequest{
 		ImageId:     defaultOScOMI,
 		KeypairName: &d.KeypairName,
+		SecurityGroupIds: &[]string{
+			d.SecurityGroupId,
+		},
 	}
 
 	createVmResponse, httpRes, err := oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()

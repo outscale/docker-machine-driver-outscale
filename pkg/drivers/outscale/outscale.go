@@ -218,19 +218,19 @@ func (d *OscDriver) DriverName() string {
 func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.StringFlag{
-			EnvVar: "OSC_ACCESS_KEY",
+			EnvVar: "OUTSCALE_ACCESSKEYID",
 			Name:   "osc-access-key",
 			Usage:  "Outscale Access Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_SECRET_KEY",
+			EnvVar: "OUTSCALE_SECRETKEYID",
 			Name:   "osc-secret-key",
 			Usage:  "Outscale Secret Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_REGION",
+			EnvVar: "OUTSCALE_REGION",
 			Name:   "osc-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  defaultOscRegion,

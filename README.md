@@ -1,0 +1,60 @@
+# docker-machine-driver-outscale
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/outscale-mdr/docker-machine-driver-outscale)](https://goreportcard.com/report/github.com/outscale-mdr/docker-machine-driver-outscale)
+[![GitHub release](https://img.shields.io/github/release/outscale-mdr/docker-machine-driver-outscale.svg)](https://github.com/outscale-mdr/docker-machine-driver-outscale/releases/)
+
+Outscale Driver lugin for docker-machine
+
+## Install
+If you would rather build from source, you will need to have a working `go` 1.17+ environment,
+
+```bash
+eval $(go env)
+export PATH="$PATH:$GOPATH/bin"
+```
+
+You can then install `docker-machine` from source by running:
+
+```bash
+go get github.com/docker/machine
+cd $GOPATH/src/github.com/docker/machine
+make build
+```
+
+And then compile the `docker-machine-driver-outscale` driver:
+
+```bash
+go get github.com/outscale-mdr/docker-machine-driver-outscale
+cd $GOPATH/src/github.com/outscale-mdr/docker-machine-driver-outscale
+make install
+```
+
+## Run
+In order to create a machine, you will need to have you AK/SK . You can find information here: [Documentation](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html)
+
+```bash
+docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  --outscale-secret-key=<outscale-secret-key> --outscale-region=<outscale-region> outscale
+```
+
+### Options
+| Argument | Env | Default | Description
+| --- | --- | --- | ---
+| `outscale-access-key` | `OUTSCALE_ACCESSKEYID` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-secret-key` | `OUTSCALE_SECRETKEYID` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-region` | `OUTSCALE_REGION` | eu-west-2 | **required** Outscale Region
+
+
+## Debugging
+Detailed run output will be emitted when using  the `docker-machine` `--debug` option.
+
+```bash
+docker-machine --debug  create -d outscale --outscale-access-key=<outscale-access-key>  --outscale-secret-key=<outscale-secret-key> --outscale-region=<outscale-region> outscale
+```
+
+## License
+
+> Copyright Outscale SAS
+>
+> BSD-3-Clause
+
+This project is compliant with [REUSE](https://reuse.software/).

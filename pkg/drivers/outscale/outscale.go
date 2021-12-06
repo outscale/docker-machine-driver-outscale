@@ -33,6 +33,7 @@ type OscDriver struct {
 	VmId            string
 	KeypairName     string
 	SecurityGroupId string
+	PublicIpId      string
 }
 
 type OscApiData struct {
@@ -96,7 +97,9 @@ func (d *OscDriver) Create() error {
 	}
 
 	// (TODO) Assign an Public IP
-
+	if err := createPublicIp(d); err != nil {
+		return err
+	}
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
 		ImageId:     defaultOScOMI,
@@ -150,7 +153,15 @@ func (d *OscDriver) Create() error {
 		return errors.New("Error while reading the VM: there is no VM")
 	}
 
-	d.IPAddress = response.GetVms()[0].GetPublicIp()
+	// Link the Public Ip
+	if err := linkPublicIp(d); err != nil {
+		return err
+	}
+
+	// Add the tag of the Vm name
+	if err := addTag(d, d.VmId, "name", d.GetMachineName()); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -30,12 +30,12 @@ type OscDriver struct {
 
 	oscApi *OscApiData
 
-	ak     string
-	sk     string
-	region string
+	Ak     string
+	Sk     string
+	Region string
 
-	VmId        string
-	keypairName string
+	VmId            string
+	KeypairName     string
 }
 
 type OscApiData struct {
@@ -61,12 +61,12 @@ func (d *OscDriver) getClient() (*OscApiData, error) {
 		client := osc.NewAPIClient(config)
 
 		ctx := context.WithValue(context.Background(), osc.ContextAWSv4, osc.AWSv4{
-			AccessKey: d.ak,
-			SecretKey: d.sk,
+			AccessKey: d.Ak,
+			SecretKey: d.Sk,
 		})
 
 		ctx = context.WithValue(ctx, osc.ContextServerIndex, 0)
-		ctx = context.WithValue(ctx, osc.ContextServerVariables, map[string]string{"region": d.region})
+		ctx = context.WithValue(ctx, osc.ContextServerVariables, map[string]string{"region": d.Region})
 
 		d.oscApi = &OscApiData{
 			client:  client,
@@ -398,15 +398,19 @@ func (d *OscDriver) Restart() error {
 // SetConfigFromFlags configures the driver with the object that was returned
 // by RegisterCreateFlags
 func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
-	if d.ak = flags.String("osc-access-key"); d.ak == "" {
+	if d.Ak = flags.String("osc-access-key"); d.Ak == "" {
 		return errors.New("Outscale Access Key is required")
 	}
 
-	if d.sk = flags.String("osc-secret-key"); d.sk == "" {
+	if d.Sk = flags.String("osc-secret-key"); d.Sk == "" {
 		return errors.New("Outscale Secret key is required")
 	}
 
-	d.region = flags.String("osc-region")
+	d.Region = flags.String("osc-region")
+
+	d.SSHKeyPath = d.GetSSHKeyPath()
+	d.SSHUser = d.GetSSHUsername()
+	d.SSHPort, _ = d.GetSSHPort()
 
 	return nil
 }

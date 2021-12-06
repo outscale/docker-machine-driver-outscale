@@ -67,3 +67,25 @@ func createKeyPair(d *OscDriver) error {
 	return nil
 
 }
+
+func deleteKeyPair(d *OscDriver, keypairName string) error {
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.DeleteKeypairRequest{
+		KeypairName: keypairName,
+	}
+
+	_, httpRes, err := oscApi.client.KeypairApi.DeleteKeypair(oscApi.context).DeleteKeypairRequest(request).Execute()
+	if err != nil {
+		log.Error("Error while submitting the Keypair deletetion request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	return nil
+}

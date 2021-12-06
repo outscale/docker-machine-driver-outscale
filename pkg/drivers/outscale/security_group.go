@@ -91,3 +91,28 @@ func createSecurityGroup(d *OscDriver) error {
 
 	return nil
 }
+
+func deleteSecurityGroup(d *OscDriver, resourceId string) error {
+	log.Debug("Deletion the Security Group")
+
+	// Get the client
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.DeleteSecurityGroupRequest{
+		SecurityGroupId: &resourceId,
+	}
+
+	_, httpRes, err := oscApi.client.SecurityGroupApi.DeleteSecurityGroup(oscApi.context).DeleteSecurityGroupRequest(request).Execute()
+	if err != nil {
+		log.Error("Error while submitting the Security Group deletion request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	return nil
+}

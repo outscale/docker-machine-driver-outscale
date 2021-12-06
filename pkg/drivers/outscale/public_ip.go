@@ -71,3 +71,29 @@ func linkPublicIp(d *OscDriver) error {
 
 	return nil
 }
+
+func deletePublicIp(d *OscDriver, resourceId string) error {
+	log.Debug("Deletion of the Public Ip")
+
+	// Get the client
+	oscApi, err := d.getClient()
+	if err != nil {
+		return err
+	}
+
+	request := osc.DeletePublicIpRequest{
+		PublicIpId: &resourceId,
+	}
+
+	_, httpRes, err := oscApi.client.PublicIpApi.DeletePublicIp(oscApi.context).DeletePublicIpRequest(request).Execute()
+	if err != nil {
+		log.Error("Error while submitting the Public IP link deletion request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return err
+	}
+
+	return nil
+
+}

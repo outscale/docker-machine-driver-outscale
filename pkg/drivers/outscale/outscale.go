@@ -320,6 +320,18 @@ func (d *OscDriver) Remove() error {
 		return err
 	}
 
+	if err := deletePublicIp(d, d.PublicIpId); err != nil {
+		return err
+	}
+
+	if err := deleteSecurityGroup(d, d.SecurityGroupId); err != nil {
+		return err
+	}
+
+	if err := deleteKeyPair(d, d.KeypairName); err != nil {
+		return err
+	}
+
 	return nil
 }
 

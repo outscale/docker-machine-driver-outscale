@@ -5,6 +5,12 @@
 
 Outscale Driver lugin for docker-machine
 
+## TODO
+- [ ] Test CRUD operations
+- [ ] Handle operation failure (remove created resources)
+- [ ] Allow private IP / VPC
+- [ ] Handle additional parameters (KeyPair, VPC, SG)
+
 ## Install
 If you would rather build from source, you will need to have a working `go` 1.17+ environment,
 

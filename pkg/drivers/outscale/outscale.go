@@ -209,11 +209,6 @@ func (d *OscDriver) GetSSHHostname() (string, error) {
 	return d.IPAddress, nil
 }
 
-// GetSSHKeyPath returns key path for use with ssh
-func (d *OscDriver) GetSSHKeyPath() string {
-	return fmt.Sprintf("/tmp/%s", d.GetMachineName())
-}
-
 // GetSSHPort returns port for use with ssh
 func (d *OscDriver) GetSSHPort() (int, error) {
 	return defaultSSHPort, nil

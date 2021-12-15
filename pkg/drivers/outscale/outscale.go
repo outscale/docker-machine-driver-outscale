@@ -177,19 +177,19 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_ACCESSKEYID",
-			Name:   "osc-access-key",
+			Name:   "outscale-access-key",
 			Usage:  "Outscale Access Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_SECRETKEYID",
-			Name:   "osc-secret-key",
+			Name:   "outscale-secret-key",
 			Usage:  "Outscale Secret Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_REGION",
-			Name:   "osc-region",
+			Name:   "outscale-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  defaultOscRegion,
 		},
@@ -368,15 +368,15 @@ func (d *OscDriver) Restart() error {
 // SetConfigFromFlags configures the driver with the object that was returned
 // by RegisterCreateFlags
 func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
-	if d.Ak = flags.String("osc-access-key"); d.Ak == "" {
+	if d.Ak = flags.String("outscale-access-key"); d.Ak == "" {
 		return errors.New("Outscale Access Key is required")
 	}
 
-	if d.Sk = flags.String("osc-secret-key"); d.Sk == "" {
+	if d.Sk = flags.String("outscale-secret-key"); d.Sk == "" {
 		return errors.New("Outscale Secret key is required")
 	}
 
-	d.Region = flags.String("osc-region")
+	d.Region = flags.String("outscale-region")
 
 	d.SSHKeyPath = d.GetSSHKeyPath()
 	d.SSHUser = d.GetSSHUsername()

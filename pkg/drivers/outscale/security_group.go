@@ -15,6 +15,7 @@ var (
 	nginxIngressHttpPort  int32 = 80
 	nginxIngressHttpsPort int32 = 443
 	nodePort                    = []int32{30000, 32767}
+	kubePort              int32 = 10250
 )
 
 func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurityGroupRuleRequest) error {
@@ -171,6 +172,19 @@ func createSecurityGroup(d *OscDriver) error {
 	ruleRequest.SetIpRange("0.0.0.0/0")
 	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
 		log.Error("Error while adding the node port rule in the SecurityGroup")
+		return err
+	}
+
+	// Kube Port
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(kubePort)
+	ruleRequest.SetToPortRange(kubePort)
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the kube port rule in the SecurityGroup")
 		return err
 	}
 

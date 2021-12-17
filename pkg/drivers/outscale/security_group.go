@@ -9,6 +9,14 @@ import (
 	osc "github.com/outscale/osc-sdk-go/v2"
 )
 
+var (
+	etcdPort                    = []int32{2379, 2380}
+	kubeApiPort           int32 = 6443
+	nginxIngressHttpPort  int32 = 80
+	nginxIngressHttpsPort int32 = 443
+	nodePort                    = []int32{30000, 32767}
+)
+
 func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurityGroupRuleRequest) error {
 	// Get the client
 	oscApi, err := d.getClient()
@@ -76,7 +84,7 @@ func createSecurityGroup(d *OscDriver) error {
 		return err
 	}
 
-	// Add TCP defaultPort rule
+	// Add TCP Docker rule
 	dockerPortRuleRequest := osc.CreateSecurityGroupRuleRequest{}
 	dockerPortRuleRequest.SetIpProtocol("tcp")
 	dockerPortRuleRequest.SetFlow("Inbound")
@@ -86,6 +94,83 @@ func createSecurityGroup(d *OscDriver) error {
 	dockerPortRuleRequest.SetIpRange("0.0.0.0/0")
 	if err := addSecurityGroupRule(d, d.SecurityGroupId, &dockerPortRuleRequest); err != nil {
 		log.Error("Error while adding the docker rule in the SecurityGroup")
+		return err
+	}
+
+	// Add ETCD Port
+	ruleRequest := osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(etcdPort[0])
+	ruleRequest.SetToPortRange(etcdPort[1])
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the etcd rule in the SecurityGroup")
+		return err
+	}
+
+	// Add Kube api Port
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(kubeApiPort)
+	ruleRequest.SetToPortRange(kubeApiPort)
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the kubeApi rule in the SecurityGroup")
+		return err
+	}
+
+	// Add nginxIngress HTTP Port
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(nginxIngressHttpPort)
+	ruleRequest.SetToPortRange(nginxIngressHttpPort)
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the nginx ingress HTTP rule in the SecurityGroup")
+		return err
+	}
+
+	// Add nginxIngress HTTPS Port
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(nginxIngressHttpsPort)
+	ruleRequest.SetToPortRange(nginxIngressHttpsPort)
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the nginx ingress HTTPS rule in the SecurityGroup")
+		return err
+	}
+
+	// Add node Port
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("tcp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(nodePort[0])
+	ruleRequest.SetToPortRange(nodePort[1])
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the node port rule in the SecurityGroup")
+		return err
+	}
+
+	ruleRequest = osc.CreateSecurityGroupRuleRequest{}
+	ruleRequest.SetIpProtocol("udp")
+	ruleRequest.SetFlow("Inbound")
+	ruleRequest.SetSecurityGroupId(d.SecurityGroupId)
+	ruleRequest.SetFromPortRange(nodePort[0])
+	ruleRequest.SetToPortRange(nodePort[1])
+	ruleRequest.SetIpRange("0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, &ruleRequest); err != nil {
+		log.Error("Error while adding the node port rule in the SecurityGroup")
 		return err
 	}
 

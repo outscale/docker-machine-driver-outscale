@@ -14,7 +14,8 @@ import (
 
 const (
 	defaultOscRegion   = "eu-west-2"
-	defaultOScOMI      = "ami-504e6b16" // Debian
+	defaultOscOMI      = "ami-504e6b16"  // Debian
+	defaultOscVmType   = "tinav2.c1r2p3" //t2.small
 	defaultDockerPort  = 2376
 	defaultSSHPort     = 22
 	defaultSSHUsername = "outscale"
@@ -34,6 +35,8 @@ type OscDriver struct {
 	KeypairName     string
 	SecurityGroupId string
 	PublicIpId      string
+
+	instanceType string
 }
 
 type OscApiData struct {
@@ -102,8 +105,9 @@ func (d *OscDriver) Create() error {
 	}
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
-		ImageId:     defaultOScOMI,
+		ImageId:     defaultOscOMI,
 		KeypairName: &d.KeypairName,
+		VmType:      &d.instanceType,
 		SecurityGroupIds: &[]string{
 			d.SecurityGroupId,
 		},
@@ -192,6 +196,12 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "outscale-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  defaultOscRegion,
+		},
+		mcnflag.StringFlag{
+			EnvVar: "OUTSCALE_INSTANCE_TYPE",
+			Name:   "outscale-instance-type",
+			Usage:  "VM Instance type",
+			Value:  defaultOscVmType,
 		},
 	}
 }
@@ -372,6 +382,7 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	}
 
 	d.Region = flags.String("outscale-region")
+	d.instanceType = flags.String("outscale-instance-type")
 
 	d.SSHKeyPath = d.GetSSHKeyPath()
 	d.SSHUser = d.GetSSHUsername()

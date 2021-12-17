@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/outscale-mdr/docker-machine-driver-outscale)](https://goreportcard.com/report/github.com/outscale-mdr/docker-machine-driver-outscale)
 [![GitHub release](https://img.shields.io/github/release/outscale-mdr/docker-machine-driver-outscale.svg)](https://github.com/outscale-mdr/docker-machine-driver-outscale/releases/)
 
-Outscale Driver lugin for docker-machine
+Outscale Driver plugin for docker-machine
 
 ## TODO
 - [ ] Test CRUD operations
@@ -47,7 +47,8 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | --- | --- | --- | ---
 | `outscale-access-key` | `OUTSCALE_ACCESSKEYID` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
 | `outscale-secret-key` | `OUTSCALE_SECRETKEYID` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
-| `outscale-region` | `OUTSCALE_REGION` | eu-west-2 | **required** Outscale Region
+| `outscale-region` | `OUTSCALE_REGION` | eu-west-2 | Outscale Region
+| `outscale-instance-type` | `OUTSCALE_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
 
 
 ## Debugging

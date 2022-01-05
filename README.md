@@ -45,10 +45,10 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 ### Options
 | Argument | Env | Default | Description
 | --- | --- | --- | ---
-| `outscale-access-key` | `OUTSCALE_ACCESSKEYID` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
-| `outscale-secret-key` | `OUTSCALE_SECRETKEYID` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
-| `outscale-region` | `OUTSCALE_REGION` | eu-west-2 | Outscale Region
-| `outscale-instance-type` | `OUTSCALE_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
+| `outscale-access-key` | `OSC_ACCESS_KEY` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-secret-key` | `OSC_SECRET_KEY` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-region` | `OSC_REGION` | eu-west-2 | Outscale Region
+| `outscale-instance-type` | `OSC_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
 
 
 ## Debugging

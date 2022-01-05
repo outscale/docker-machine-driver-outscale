@@ -19,7 +19,6 @@ const (
 	defaultDockerPort  = 2376
 	defaultSSHPort     = 22
 	defaultSSHUsername = "outscale"
-	defaultKeyPairPath = "/tmp/keypair"
 )
 
 type OscDriver struct {
@@ -182,25 +181,25 @@ func (d *OscDriver) DriverName() string {
 func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.StringFlag{
-			EnvVar: "OUTSCALE_ACCESSKEYID",
+			EnvVar: "OSC_ACCESS_KEY",
 			Name:   "outscale-access-key",
 			Usage:  "Outscale Access Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OUTSCALE_SECRETKEYID",
+			EnvVar: "OSC_SECRET_KEY",
 			Name:   "outscale-secret-key",
 			Usage:  "Outscale Secret Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OUTSCALE_REGION",
+			EnvVar: "OSC_REGION",
 			Name:   "outscale-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  defaultOscRegion,
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OUTSCALE_INSTANCE_TYPE",
+			EnvVar: "OSC_INSTANCE_TYPE",
 			Name:   "outscale-instance-type",
 			Usage:  "VM Instance type",
 			Value:  defaultOscVmType,

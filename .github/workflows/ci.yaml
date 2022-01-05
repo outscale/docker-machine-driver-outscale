@@ -1,0 +1,34 @@
+
+# Github action for releasing the binaries
+name: Acceptance Tests
+
+on:
+  pull_request_target:
+    branches:
+      - master
+  workflow_dispatch:
+    
+
+jobs:
+  Acceptances_tests:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Install BATS
+        run:
+          sudo apt install -y bats
+      - name: Install docker-machine
+        run:
+          curl -L https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&
+          chmod +x /tmp/docker-machine &&
+          sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+      - name: Run acceptance tests
+        run: make testacc
+        env:
+          OSC_ACCESS_KEY: ${{ secrets.OSC_ACCESS_KEY }}
+          OSC_SECRET_KEY: ${{ secrets.OSC_SECRET_KEY }}
+          OSC_REGION: ${{ secrets.OSC_REGION }}

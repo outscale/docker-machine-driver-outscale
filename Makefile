@@ -40,3 +40,7 @@ uninstall:
 .PHONY: install
 install: build
 	go install
+
+.PHONY: testacc
+testacc: install
+	@sh -c 'test/run_bats.sh test'

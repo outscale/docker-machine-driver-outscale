@@ -157,6 +157,11 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 		return err
 	}
 
+	if resourceId == "" {
+		log.Warn("Skipping deletion of the security group because none was stored.")
+		return nil
+	}
+
 	request := osc.DeleteSecurityGroupRequest{
 		SecurityGroupId: &resourceId,
 	}

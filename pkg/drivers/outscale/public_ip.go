@@ -81,6 +81,11 @@ func deletePublicIp(d *OscDriver, resourceId string) error {
 		return err
 	}
 
+	if resourceId == "" {
+		log.Warn("Skipping deletion of the public IP because none was stored.")
+		return nil
+	}
+
 	request := osc.DeletePublicIpRequest{
 		PublicIpId: &resourceId,
 	}

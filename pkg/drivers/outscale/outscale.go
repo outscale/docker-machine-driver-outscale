@@ -307,23 +307,27 @@ func (d *OscDriver) Remove() error {
 		return err
 	}
 
-	request := osc.DeleteVmsRequest{
-		VmIds: []string{
-			d.VmId,
-		},
-	}
-
-	_, httpRes, err := oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
-	if err != nil {
-		fmt.Printf("Error while submitting the DeleteVm request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
+	if d.VmId != "" {
+		request := osc.DeleteVmsRequest{
+			VmIds: []string{
+				d.VmId,
+			},
 		}
-		return err
-	}
 
-	if err := d.waitForState(d.VmId, "terminated"); err != nil {
-		return err
+		_, httpRes, err := oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
+		if err != nil {
+			fmt.Printf("Error while submitting the DeleteVm request: ")
+			if httpRes != nil {
+				fmt.Printf(httpRes.Status)
+			}
+			return err
+		}
+
+		if err := d.waitForState(d.VmId, "terminated"); err != nil {
+			return err
+		}
+	} else {
+		log.Warn("Skipping deletion of the VM because none was stored.")
 	}
 
 	if err := deletePublicIp(d, d.PublicIpId); err != nil {

@@ -74,6 +74,11 @@ func deleteKeyPair(d *OscDriver, keypairName string) error {
 		return err
 	}
 
+	if keypairName == "" {
+		log.Warn("Skipping deletion of the keypair because none was stored.")
+		return nil
+	}
+
 	request := osc.DeleteKeypairRequest{
 		KeypairName: keypairName,
 	}

@@ -26,6 +26,7 @@ type OscDriver struct {
 
 	oscApi *OscApiData
 
+	// Stored
 	Ak     string
 	Sk     string
 	Region string
@@ -35,7 +36,9 @@ type OscDriver struct {
 	SecurityGroupId string
 	PublicIpId      string
 
+	// Unstored
 	instanceType string
+	sourceOmi    string
 }
 
 type OscApiData struct {
@@ -106,7 +109,7 @@ func (d *OscDriver) Create() error {
 	}
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
-		ImageId:     defaultOscOMI,
+		ImageId:     d.sourceOmi,
 		KeypairName: &d.KeypairName,
 		VmType:      &d.instanceType,
 		SecurityGroupIds: &[]string{
@@ -203,6 +206,12 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "outscale-instance-type",
 			Usage:  "VM Instance type",
 			Value:  defaultOscVmType,
+		},
+		mcnflag.StringFlag{
+			EnvVar: "OSC_SOURCE_OMI",
+			Name:   "outscale-source-omi",
+			Usage:  "OMI to use as bootstrap",
+			Value:  defaultOscOMI,
 		},
 	}
 }
@@ -388,6 +397,7 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 
 	d.Region = flags.String("outscale-region")
 	d.instanceType = flags.String("outscale-instance-type")
+	d.sourceOmi = flags.String("outscale-source-omi")
 
 	d.SSHKeyPath = d.GetSSHKeyPath()
 	d.SSHUser = d.GetSSHUsername()

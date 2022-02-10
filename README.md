@@ -49,6 +49,7 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-secret-key` | `OSC_SECRET_KEY` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
 | `outscale-region` | `OSC_REGION` | eu-west-2 | Outscale Region
 | `outscale-instance-type` | `OSC_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
+| `outscale-source-omi`    | `OSC_SOURCE_OMI`    | ami-504e6b16 (Debian-10-2021.05.12-3) | Outscale Machine Image to use as bootstrap for the VM (see [here](https://docs.outscale.com/en/userguide/Official-OMIs-Reference.html#_supported_official_images)) |
 
 
 ## Debugging

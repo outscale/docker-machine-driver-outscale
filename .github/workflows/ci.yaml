@@ -19,12 +19,14 @@ jobs:
         with:
           go-version: 1.17
       - name: Install BATS
-        run:
-          sudo apt install -y bats
+        run: |
+          git clone https://github.com/bats-core/bats-core.git
+          cd bats-core
+          ./install.sh /usr/local
       - name: Install docker-machine
-        run:
-          curl -L https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&
-          chmod +x /tmp/docker-machine &&
+        run: |
+          curl -L https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine 
+          chmod +x /tmp/docker-machine 
           sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
       - name: Run acceptance tests
         run: make testacc

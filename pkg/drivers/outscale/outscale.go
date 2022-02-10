@@ -58,7 +58,7 @@ func (d *OscDriver) getClient() (*OscApiData, error) {
 		config := osc.NewConfiguration()
 
 		config.Debug = true
-		config.UserAgent = "docker-machine-driver-outscale"
+		config.UserAgent = fmt.Sprintf("docker-machine-driver-outscale/%s", GetVersion())
 
 		client := osc.NewAPIClient(config)
 

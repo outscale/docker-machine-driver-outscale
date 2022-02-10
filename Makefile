@@ -10,9 +10,13 @@ ifeq ($(GOOS),windows)
 	BIN_SUFFIX := ".exe"
 endif
 
+VERSION=$(shell git describe --exact-match 2> /dev/null || \
+                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+
+LDFLAGS=-ldflags "-X github.com/outscale-mdr/docker-machine-driver-outscale/pkg/drivers/outscale.version=${VERSION}"
 .PHONY: build
 build: dep
-	go build -ldflags "-X github.com/outscale-mdr/docker-machine-driver-outscale/pkg/drivers/outscale.VERSION=`git describe --always`" -o $(OUT_DIR)/$(PROG)$(BIN_SUFFIX) ./
+	go build $(LDFLAGS) -o $(OUT_DIR)/$(PROG)$(BIN_SUFFIX) ./
 
 .PHONY: dep
 dep:
@@ -39,7 +43,7 @@ uninstall:
 
 .PHONY: install
 install: build
-	go install
+	go install $(LDFLAGS)
 
 .PHONY: testacc
 testacc: install

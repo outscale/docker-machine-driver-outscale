@@ -2,6 +2,7 @@ package outscale
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/docker/machine/libmachine/log"
 	osc "github.com/outscale/osc-sdk-go/v2"
@@ -38,4 +39,36 @@ func addTag(d *OscDriver, resourceId string, key string, value string) error {
 	}
 
 	return nil
+}
+
+func addExtraTags(d *OscDriver, resourceId string, tags []string) error {
+	if tags == nil {
+		log.Debug("Skipping because there is no tags to add")
+		return nil
+	}
+
+	for _, tag := range tags {
+		splittedTag := strings.Split(tag, "=")
+		if len(splittedTag) != 2 {
+			return fmt.Errorf("The tags '%v' does not have the right syntax 'key=value'", tag)
+		}
+		key := splittedTag[0]
+		value := splittedTag[1]
+
+		log.Debugf("Adding tag '%v' to the resource %v", tag, resourceId)
+		if err := addTag(d, resourceId, key, value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateExtraTagsFormat(tags []string) bool {
+	for _, tag := range tags {
+		splittedTag := strings.Split(tag, "=")
+		if len(splittedTag) != 2 {
+			return false
+		}
+	}
+	return true
 }

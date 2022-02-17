@@ -37,8 +37,10 @@ type OscDriver struct {
 	PublicIpId      string
 
 	// Unstored
-	instanceType string
-	sourceOmi    string
+	instanceType       string
+	sourceOmi          string
+	extraTagsAll       []string
+	extraTagsInstances []string
 }
 
 type OscApiData struct {
@@ -171,6 +173,16 @@ func (d *OscDriver) Create() error {
 		return err
 	}
 
+	// Add extra tags to the Instances
+	if err := addExtraTags(d, d.VmId, d.extraTagsAll); err != nil {
+		return err
+	}
+
+	// Add extra tags only for the Instances
+	if err := addExtraTags(d, d.VmId, d.extraTagsInstances); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -212,6 +224,18 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "outscale-source-omi",
 			Usage:  "OMI to use as bootstrap",
 			Value:  defaultOscOMI,
+		},
+		mcnflag.StringSliceFlag{
+			EnvVar: "",
+			Name:   "outscale-extra-tags-all",
+			Usage:  "Tags to set at all created resources",
+			Value:  nil,
+		},
+		mcnflag.StringSliceFlag{
+			EnvVar: "",
+			Name:   "outscale-extra-tags-instances",
+			Usage:  "Tags to set only to instances <key1=value1,key2=value2>",
+			Value:  nil,
 		},
 	}
 }
@@ -399,6 +423,16 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.instanceType = flags.String("outscale-instance-type")
 	d.sourceOmi = flags.String("outscale-source-omi")
 
+	// Tags
+	if d.extraTagsAll = flags.StringSlice("outscale-extra-tags-all"); !validateExtraTagsFormat(d.extraTagsAll) {
+		return errors.New("outscale-extra-tags-all have not the expected syntax.")
+	}
+
+	if d.extraTagsInstances = flags.StringSlice("outscale-extra-tags-instances"); !validateExtraTagsFormat(d.extraTagsInstances) {
+		return errors.New("outscale-extra-tags-instances have not the expected syntax.")
+	}
+
+	// SSH
 	d.SSHKeyPath = d.GetSSHKeyPath()
 	d.SSHUser = d.GetSSHUsername()
 	d.SSHPort, _ = d.GetSSHPort()

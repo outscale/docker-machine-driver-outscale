@@ -145,6 +145,11 @@ func createSecurityGroup(d *OscDriver) error {
 		return err
 	}
 
+	// Add extra tags
+	if err := addExtraTags(d, d.SecurityGroupId, d.extraTagsAll); err != nil {
+		return err
+	}
+
 	return nil
 }
 

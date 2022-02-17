@@ -42,7 +42,7 @@ uninstall:
 	$(RM) $(GOPATH)/bin/$(PROG)$(BIN_SUFFIX)
 
 .PHONY: install
-install: build
+install: dep
 	go install $(LDFLAGS)
 
 .PHONY: testacc

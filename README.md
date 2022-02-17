@@ -6,8 +6,6 @@
 Outscale Driver plugin for docker-machine
 
 ## TODO
-- [ ] Test CRUD operations
-- [ ] Handle operation failure (remove created resources)
 - [ ] Allow private IP / VPC
 - [ ] Handle additional parameters (KeyPair, VPC, SG)
 
@@ -50,6 +48,8 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-region` | `OSC_REGION` | eu-west-2 | Outscale Region
 | `outscale-instance-type` | `OSC_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
 | `outscale-source-omi`    | `OSC_SOURCE_OMI`    | ami-504e6b16 (Debian-10-2021.05.12-3) | Outscale Machine Image to use as bootstrap for the VM (see [here](https://docs.outscale.com/en/userguide/Official-OMIs-Reference.html#_supported_official_images)) |
+| `outscale-extra-tags-all` | `` | nil| Extra tags for all created resources. Format "key=value". Can be set multiple times
+| `outscale-extra-tags-instances` | `` | nil | Extra tags only for instances. Format "key=value". Can be set multiple times
 
 
 ## Debugging

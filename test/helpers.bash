@@ -32,6 +32,16 @@ function require_env {
     fi
 }
 
+function require_tool {
+    set +e 
+    which $1
+    if [ $? -ne 0 ]; then
+		errecho "This test requires $1 to be installed"
+		exit 1
+	fi
+    set -e
+}
+
 function use_disposable_machine {
     if [[ -z "$NAME" ]]; then
         export NAME="bats-outscale-test-$(date +%s)"

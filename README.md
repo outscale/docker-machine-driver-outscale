@@ -1,7 +1,7 @@
 # docker-machine-driver-outscale
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/outscale-mdr/docker-machine-driver-outscale)](https://goreportcard.com/report/github.com/outscale-mdr/docker-machine-driver-outscale)
-[![GitHub release](https://img.shields.io/github/release/outscale-mdr/docker-machine-driver-outscale.svg)](https://github.com/outscale-mdr/docker-machine-driver-outscale/releases/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/outscale-dev/docker-machine-driver-outscale)](https://goreportcard.com/report/github.com/outscale-dev/docker-machine-driver-outscale)
+[![GitHub release](https://img.shields.io/github/release/outscale-dev/docker-machine-driver-outscale.svg)](https://github.com/outscale-dev/docker-machine-driver-outscale/releases/)
 
 Outscale Driver plugin for docker-machine
 
@@ -28,8 +28,8 @@ make build
 And then compile the `docker-machine-driver-outscale` driver:
 
 ```bash
-go get github.com/outscale-mdr/docker-machine-driver-outscale
-cd $GOPATH/src/github.com/outscale-mdr/docker-machine-driver-outscale
+go get github.com/outscale-dev/docker-machine-driver-outscale
+cd $GOPATH/src/github.com/outscale-dev/docker-machine-driver-outscale
 make install
 ```
 

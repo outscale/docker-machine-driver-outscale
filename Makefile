@@ -13,7 +13,7 @@ endif
 VERSION=$(shell git describe --exact-match 2> /dev/null || \
                  git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
 
-LDFLAGS=-ldflags "-X github.com/outscale-mdr/docker-machine-driver-outscale/pkg/drivers/outscale.version=${VERSION}"
+LDFLAGS=-ldflags "-X github.com/outscale-dev/docker-machine-driver-outscale/pkg/drivers/outscale.version=${VERSION}"
 .PHONY: build
 build: dep
 	go build $(LDFLAGS) -o $(OUT_DIR)/$(PROG)$(BIN_SUFFIX) ./

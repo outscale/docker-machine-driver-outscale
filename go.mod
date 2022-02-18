@@ -1,4 +1,4 @@
-module github.com/outscale-mdr/docker-machine-driver-outscale
+module github.com/outscale-dev/docker-machine-driver-outscale
 
 go 1.17
 

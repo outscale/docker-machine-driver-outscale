@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/outscale-mdr/docker-machine-driver-outscale/pkg/drivers/outscale"
+	"github.com/outscale-dev/docker-machine-driver-outscale/pkg/drivers/outscale"
 
 	"github.com/docker/machine/libmachine/drivers/plugin"
 )

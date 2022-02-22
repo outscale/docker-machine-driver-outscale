@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/log"
@@ -211,7 +212,7 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			EnvVar: "OUTSCALE_REGION",
 			Name:   "outscale-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
-			Value:  defaultOscRegion,
+			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_INSTANCE_TYPE",
@@ -412,14 +413,23 @@ func (d *OscDriver) Restart() error {
 // by RegisterCreateFlags
 func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	if d.Ak = flags.String("outscale-access-key"); d.Ak == "" {
-		return errors.New("Outscale Access Key is required")
+		if d.Ak = os.Getenv("OSC_ACCESS_KEY"); d.Ak == "" {
+			return errors.New("Outscale Access Key is required")
+		}
 	}
 
 	if d.Sk = flags.String("outscale-secret-key"); d.Sk == "" {
-		return errors.New("Outscale Secret key is required")
+		if d.Sk = os.Getenv("OSC_SECRET_KEY"); d.Ak == "" {
+			return errors.New("Outscale Secret key is required")
+		}
 	}
 
-	d.Region = flags.String("outscale-region")
+	if d.Region = flags.String("outscale-region"); d.Region == "" {
+		if d.Region = os.Getenv("OSC_REGION"); d.Region == "" {
+			d.Region = defaultOscRegion
+		}
+	}
+
 	d.instanceType = flags.String("outscale-instance-type")
 	d.sourceOmi = flags.String("outscale-source-omi")
 

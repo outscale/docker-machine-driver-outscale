@@ -43,11 +43,11 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 ### Options
 | Argument | Env | Default | Description
 | --- | --- | --- | ---
-| `outscale-access-key` | `OSC_ACCESS_KEY` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
-| `outscale-secret-key` | `OSC_SECRET_KEY` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
-| `outscale-region` | `OSC_REGION` | eu-west-2 | Outscale Region
-| `outscale-instance-type` | `OSC_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
-| `outscale-source-omi`    | `OSC_SOURCE_OMI`    | ami-504e6b16 (Debian-10-2021.05.12-3) | Outscale Machine Image to use as bootstrap for the VM (see [here](https://docs.outscale.com/en/userguide/Official-OMIs-Reference.html#_supported_official_images)) |
+| `outscale-access-key` | `OUTSCALE_ACCESS_KEY\|OSC_ACCESS_KEY` | None | **required** Outscale Access Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-secret-key` | `OUTSCALE_SECRET_KEY\|OSC_SECRET_KEY` | None | **required** Outscale Secret Key (see [here](https://docs.outscale.com/en/userguide/Getting-Information-About-Your-Access-Keys.html))
+| `outscale-region` | `OUTSCALE_REGION\|OSC_REGION` | eu-west-2 | Outscale Region
+| `outscale-instance-type` | `OUTSCALE_INSTANCE_TYPE` | tinav2.c1r2p3 (t2.small) | Outscale VM Instance Type (see [here](https://docs.outscale.com/en/userguide/Instance-Types.html))
+| `outscale-source-omi`    | `OUTSCALE_SOURCE_OMI`    | ami-504e6b16 (Debian-10-2021.05.12-3) | Outscale Machine Image to use as bootstrap for the VM (see [here](https://docs.outscale.com/en/userguide/Official-OMIs-Reference.html#_supported_official_images)) |
 | `outscale-extra-tags-all` | `` | nil| Extra tags for all created resources. Format "key=value". Can be set multiple times
 | `outscale-extra-tags-instances` | `` | nil | Extra tags only for instances. Format "key=value". Can be set multiple times
 

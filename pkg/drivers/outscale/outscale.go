@@ -196,31 +196,31 @@ func (d *OscDriver) DriverName() string {
 func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.StringFlag{
-			EnvVar: "OSC_ACCESS_KEY",
+			EnvVar: "OUTSCALE_ACCESS_KEY",
 			Name:   "outscale-access-key",
 			Usage:  "Outscale Access Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_SECRET_KEY",
+			EnvVar: "OUTSCALE_SECRET_KEY",
 			Name:   "outscale-secret-key",
 			Usage:  "Outscale Secret Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_REGION",
+			EnvVar: "OUTSCALE_REGION",
 			Name:   "outscale-region",
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  defaultOscRegion,
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_INSTANCE_TYPE",
+			EnvVar: "OUTSCALE_INSTANCE_TYPE",
 			Name:   "outscale-instance-type",
 			Usage:  "VM Instance type",
 			Value:  defaultOscVmType,
 		},
 		mcnflag.StringFlag{
-			EnvVar: "OSC_SOURCE_OMI",
+			EnvVar: "OUTSCALE_SOURCE_OMI",
 			Name:   "outscale-source-omi",
 			Usage:  "OMI to use as bootstrap",
 			Value:  defaultOscOMI,

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -11,8 +12,10 @@ import (
 )
 
 const (
-	defaultMaxAttempts = 180
-	defaultDelay       = time.Duration(1) * time.Second
+	defaultReadMaxAttempts       = 180
+	defaultReadDelay             = time.Duration(1) * time.Second
+	defaultThrottlingDelay       = time.Duration(5) * time.Second
+	defaultThrottlingMaxAttempts = 60
 )
 
 func (d *OscDriver) waitForState(vmId string, state string) error {
@@ -49,8 +52,8 @@ func (d *OscDriver) waitForState(vmId string, state string) error {
 			}
 			return nil
 		},
-		retry.Attempts(defaultMaxAttempts),
-		retry.Delay(defaultDelay),
+		retry.Attempts(defaultReadMaxAttempts),
+		retry.Delay(defaultReadDelay),
 		retry.OnRetry(func(n uint, err error) {
 			log.Printf("[DEBUG] Vm is not in the wanted state, retrying...")
 		}),
@@ -61,4 +64,13 @@ func (d *OscDriver) waitForState(vmId string, state string) error {
 	}
 
 	return nil
+}
+
+func isThrottlingError(err error) bool {
+	if err != nil {
+		if strings.Contains(fmt.Sprint(err), "RequestLimitExceeded:") {
+			return true
+		}
+	}
+	return false
 }

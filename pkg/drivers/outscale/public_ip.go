@@ -3,7 +3,9 @@ package outscale
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
+	retry "github.com/avast/retry-go"
 	"github.com/docker/machine/libmachine/log"
 	osc "github.com/outscale/osc-sdk-go/v2"
 )
@@ -19,7 +21,22 @@ func createPublicIp(d *OscDriver) error {
 
 	request := osc.CreatePublicIpRequest{}
 
-	response, httpRes, err := oscApi.client.PublicIpApi.CreatePublicIp(oscApi.context).CreatePublicIpRequest(request).Execute()
+	var httpRes *http.Response
+	var response osc.CreatePublicIpResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.PublicIpApi.CreatePublicIp(oscApi.context).CreatePublicIpRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Public IP creation request: ")
 		if httpRes != nil {
@@ -52,7 +69,22 @@ func linkPublicIp(d *OscDriver) error {
 		VmId:       &d.VmId,
 	}
 
-	response, httpRes, err := oscApi.client.PublicIpApi.LinkPublicIp(oscApi.context).LinkPublicIpRequest(request).Execute()
+	var httpRes *http.Response
+	var response osc.LinkPublicIpResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.PublicIpApi.LinkPublicIp(oscApi.context).LinkPublicIpRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Public IP link request: ")
 		if httpRes != nil {
@@ -90,7 +122,21 @@ func deletePublicIp(d *OscDriver, resourceId string) error {
 		PublicIpId: &resourceId,
 	}
 
-	_, httpRes, err := oscApi.client.PublicIpApi.DeletePublicIp(oscApi.context).DeletePublicIpRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.PublicIpApi.DeletePublicIp(oscApi.context).DeletePublicIpRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Public IP link deletion request: ")
 		if httpRes != nil {

@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
+	retry "github.com/avast/retry-go"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/mcnflag"
@@ -128,7 +130,22 @@ func (d *OscDriver) Create() error {
 		},
 	}
 
-	createVmResponse, httpRes, err := oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
+	var createVmResponse osc.CreateVmsResponse
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			createVmResponse, httpRes, response_error = oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Vm creation request: ")
 		if httpRes != nil {
@@ -159,7 +176,20 @@ func (d *OscDriver) Create() error {
 		},
 	}
 
-	response, httpRes, err := oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+	var response osc.ReadVmsResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
 	if err != nil {
 		fmt.Printf("Error while submitting the Vm creation request: ")
 		if httpRes != nil {
@@ -293,7 +323,22 @@ func (d *OscDriver) GetState() (state.State, error) {
 		},
 	}
 
-	readVmResponse, httpRes, err := oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+	var readVmResponse osc.ReadVmsResponse
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			readVmResponse, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		fmt.Printf("Error while submitting the Vm creation request: ")
 		if httpRes != nil {
@@ -329,7 +374,21 @@ func (d *OscDriver) PreCreateCheck() error {
 
 	request := osc.ReadAccountsRequest{}
 
-	_, httpRes, err := oscApi.client.AccountApi.ReadAccounts(oscApi.context).ReadAccountsRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.AccountApi.ReadAccounts(oscApi.context).ReadAccountsRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		fmt.Printf("Error while submitting the ReadAcoount request: ")
 		if httpRes != nil {
@@ -356,7 +415,21 @@ func (d *OscDriver) Remove() error {
 			},
 		}
 
-		_, httpRes, err := oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
+		var httpRes *http.Response
+		err = retry.Do(
+			func() error {
+				var response_error error
+				_, httpRes, response_error = oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
+				return response_error
+			},
+			retry.Attempts(defaultThrottlingMaxAttempts),
+			retry.Delay(defaultThrottlingDelay),
+			retry.OnRetry(func(n uint, err error) {
+				log.Debug("Retry number %v after throttling.", n)
+			}),
+			retry.RetryIf(isThrottlingError),
+		)
+
 		if err != nil {
 			fmt.Printf("Error while submitting the DeleteVm request: ")
 			if httpRes != nil {
@@ -401,7 +474,21 @@ func (d *OscDriver) Restart() error {
 		},
 	}
 
-	_, httpRes, err := oscApi.client.VmApi.RebootVms(oscApi.context).RebootVmsRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.VmApi.RebootVms(oscApi.context).RebootVmsRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		fmt.Printf("Error while submitting the RebootVm request: ")
 		if httpRes != nil {
@@ -471,7 +558,21 @@ func (d *OscDriver) Start() error {
 		},
 	}
 
-	_, httpRes, err := oscApi.client.VmApi.StartVms(oscApi.context).StartVmsRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.VmApi.StartVms(oscApi.context).StartVmsRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		fmt.Printf("Error while submitting the StartVm request: ")
 		if httpRes != nil {
@@ -501,7 +602,21 @@ func (d *OscDriver) innerStop(force bool) error {
 	}
 	request.SetForceStop(force)
 
-	_, httpRes, err := oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		fmt.Printf("Error while submitting the StopVm request: ")
 		if httpRes != nil {

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"time"
 
+	retry "github.com/avast/retry-go"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/ssh"
 	osc "github.com/outscale/osc-sdk-go/v2"
@@ -51,7 +53,22 @@ func createKeyPair(d *OscDriver) error {
 	}
 	request.SetPublicKey(base64.StdEncoding.EncodeToString([]byte(publicKey)))
 
-	response, httpRes, err := oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
+	var response osc.CreateKeypairResponse
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Keypair creation request: ")
 		if httpRes != nil {
@@ -83,7 +100,21 @@ func deleteKeyPair(d *OscDriver, keypairName string) error {
 		KeypairName: keypairName,
 	}
 
-	_, httpRes, err := oscApi.client.KeypairApi.DeleteKeypair(oscApi.context).DeleteKeypairRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.KeypairApi.DeleteKeypair(oscApi.context).DeleteKeypairRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Keypair deletetion request: ")
 		if httpRes != nil {

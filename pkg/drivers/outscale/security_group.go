@@ -3,8 +3,10 @@ package outscale
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
+	retry "github.com/avast/retry-go"
 	"github.com/docker/machine/libmachine/log"
 	osc "github.com/outscale/osc-sdk-go/v2"
 )
@@ -25,7 +27,22 @@ func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurity
 		return err
 	}
 
-	response, httpRes, err := oscApi.client.SecurityGroupRuleApi.CreateSecurityGroupRule(oscApi.context).CreateSecurityGroupRuleRequest(*request).Execute()
+	var httpRes *http.Response
+	var response osc.CreateSecurityGroupRuleResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.SecurityGroupRuleApi.CreateSecurityGroupRule(oscApi.context).CreateSecurityGroupRuleRequest(*request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Security Group Rule creation request: ")
 		if httpRes != nil {
@@ -68,7 +85,22 @@ func createSecurityGroup(d *OscDriver) error {
 		SecurityGroupName: fmt.Sprintf("docker-machine-%s-%d", d.GetMachineName(), time.Now().Unix()),
 	}
 
-	response, httpRes, err := oscApi.client.SecurityGroupApi.CreateSecurityGroup(oscApi.context).CreateSecurityGroupRequest(request).Execute()
+	var httpRes *http.Response
+	var response osc.CreateSecurityGroupResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.SecurityGroupApi.CreateSecurityGroup(oscApi.context).CreateSecurityGroupRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Security Group creation request: ")
 		if httpRes != nil {
@@ -171,7 +203,21 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 		SecurityGroupId: &resourceId,
 	}
 
-	_, httpRes, err := oscApi.client.SecurityGroupApi.DeleteSecurityGroup(oscApi.context).DeleteSecurityGroupRequest(request).Execute()
+	var httpRes *http.Response
+	err = retry.Do(
+		func() error {
+			var response_error error
+			_, httpRes, response_error = oscApi.client.SecurityGroupApi.DeleteSecurityGroup(oscApi.context).DeleteSecurityGroupRequest(request).Execute()
+			return response_error
+		},
+		retry.Attempts(defaultThrottlingMaxAttempts),
+		retry.Delay(defaultThrottlingDelay),
+		retry.OnRetry(func(n uint, err error) {
+			log.Debug("Retry number %v after throttling.", n)
+		}),
+		retry.RetryIf(isThrottlingError),
+	)
+
 	if err != nil {
 		log.Error("Error while submitting the Security Group deletion request: ")
 		if httpRes != nil {

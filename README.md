@@ -52,6 +52,21 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-extra-tags-instances` | `` | nil | Extra tags only for instances. Format "key=value". Can be set multiple times
 
 
+## Security group
+By default, a security group will be created with theses rules
+| Type | Protocol | From Port | To Port | CIDR | Description
+| --- | --- | --- | --- | --- | ---
+| Inbound | TCP | 22 | 22 | 0.0.0.0/0 | SSH
+| Inbound | TCP | 80 | 80 | 0.0.0.0/0 | nginx Ingress Http
+| Inbound | TCP | 443 | 443 | 0.0.0.0/0 | nginx Ingress Https
+| Inbound | TCP | 2376 | 2376 | 0.0.0.0/0 | Docker daemon
+| Inbound | TCP | 2379 | 2380 | 0.0.0.0/0 | ETCD (client request and peer communication)
+| Inbound | TCP | 6443 | 6443 | 0.0.0.0/0 | Kube-api 
+| Inbound | TCP | 10250 | 10250 | 0.0.0.0/0 | Kubelet
+| Inbound | TCP | 30000 | 32767 | 0.0.0.0/0 | Node port
+| Inbound | UDP | 30000 | 32767 | 0.0.0.0/0 | Node port
+
+
 ## Debugging
 Detailed run output will be emitted when using  the `docker-machine` `--debug` option.
 

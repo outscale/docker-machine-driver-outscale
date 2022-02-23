@@ -20,6 +20,14 @@ const (
 	defaultDockerPort  = 2376
 	defaultSSHPort     = 22
 	defaultSSHUsername = "outscale"
+
+	flagAccessKey          = "outscale-access-key"
+	flagSecretKey          = "outscale-secret-key"
+	flagRegion             = "outscale-region"
+	flagInstanceType       = "outscale-instance-type"
+	flagSourceOmi          = "outscale-source-omi"
+	flagExtraTagsAll       = "outscale-extra-tags-all"
+	flagExtraTagsInstances = "outscale-extra-tags-instances"
 )
 
 type OscDriver struct {
@@ -198,43 +206,43 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 	return []mcnflag.Flag{
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_ACCESS_KEY",
-			Name:   "outscale-access-key",
+			Name:   flagAccessKey,
 			Usage:  "Outscale Access Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_SECRET_KEY",
-			Name:   "outscale-secret-key",
+			Name:   flagSecretKey,
 			Usage:  "Outscale Secret Key",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_REGION",
-			Name:   "outscale-region",
+			Name:   flagRegion,
 			Usage:  "Outscale Region (e.g. eu-west-2)",
 			Value:  "",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_INSTANCE_TYPE",
-			Name:   "outscale-instance-type",
+			Name:   flagInstanceType,
 			Usage:  "VM Instance type",
 			Value:  defaultOscVmType,
 		},
 		mcnflag.StringFlag{
 			EnvVar: "OUTSCALE_SOURCE_OMI",
-			Name:   "outscale-source-omi",
+			Name:   flagSourceOmi,
 			Usage:  "OMI to use as bootstrap",
 			Value:  defaultOscOMI,
 		},
 		mcnflag.StringSliceFlag{
 			EnvVar: "",
-			Name:   "outscale-extra-tags-all",
+			Name:   flagExtraTagsAll,
 			Usage:  "Tags to set at all created resources",
 			Value:  nil,
 		},
 		mcnflag.StringSliceFlag{
 			EnvVar: "",
-			Name:   "outscale-extra-tags-instances",
+			Name:   flagExtraTagsInstances,
 			Usage:  "Tags to set only to instances <key1=value1,key2=value2>",
 			Value:  nil,
 		},
@@ -412,34 +420,34 @@ func (d *OscDriver) Restart() error {
 // SetConfigFromFlags configures the driver with the object that was returned
 // by RegisterCreateFlags
 func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
-	if d.Ak = flags.String("outscale-access-key"); d.Ak == "" {
+	if d.Ak = flags.String(flagAccessKey); d.Ak == "" {
 		if d.Ak = os.Getenv("OSC_ACCESS_KEY"); d.Ak == "" {
 			return errors.New("Outscale Access Key is required")
 		}
 	}
 
-	if d.Sk = flags.String("outscale-secret-key"); d.Sk == "" {
+	if d.Sk = flags.String(flagSecretKey); d.Sk == "" {
 		if d.Sk = os.Getenv("OSC_SECRET_KEY"); d.Ak == "" {
 			return errors.New("Outscale Secret key is required")
 		}
 	}
 
-	if d.Region = flags.String("outscale-region"); d.Region == "" {
+	if d.Region = flags.String(flagRegion); d.Region == "" {
 		if d.Region = os.Getenv("OSC_REGION"); d.Region == "" {
 			d.Region = defaultOscRegion
 		}
 	}
 
-	d.instanceType = flags.String("outscale-instance-type")
-	d.sourceOmi = flags.String("outscale-source-omi")
+	d.instanceType = flags.String(flagInstanceType)
+	d.sourceOmi = flags.String(flagSourceOmi)
 
 	// Tags
-	if d.extraTagsAll = flags.StringSlice("outscale-extra-tags-all"); !validateExtraTagsFormat(d.extraTagsAll) {
-		return errors.New("outscale-extra-tags-all have not the expected syntax.")
+	if d.extraTagsAll = flags.StringSlice(flagExtraTagsAll); !validateExtraTagsFormat(d.extraTagsAll) {
+		return fmt.Errorf("--%v have not the expected syntax.", flagExtraTagsAll)
 	}
 
-	if d.extraTagsInstances = flags.StringSlice("outscale-extra-tags-instances"); !validateExtraTagsFormat(d.extraTagsInstances) {
-		return errors.New("outscale-extra-tags-instances have not the expected syntax.")
+	if d.extraTagsInstances = flags.StringSlice(flagExtraTagsInstances); !validateExtraTagsFormat(d.extraTagsInstances) {
+		return fmt.Errorf("--%v have not the expected syntax.", flagExtraTagsInstances)
 	}
 
 	// SSH

@@ -35,12 +35,7 @@ func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurity
 			response, httpRes, response_error = oscApi.client.SecurityGroupRuleApi.CreateSecurityGroupRule(oscApi.context).CreateSecurityGroupRuleRequest(*request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -93,12 +88,7 @@ func createSecurityGroup(d *OscDriver) error {
 			response, httpRes, response_error = oscApi.client.SecurityGroupApi.CreateSecurityGroup(oscApi.context).CreateSecurityGroupRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -210,12 +200,7 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 			_, httpRes, response_error = oscApi.client.SecurityGroupApi.DeleteSecurityGroup(oscApi.context).DeleteSecurityGroupRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {

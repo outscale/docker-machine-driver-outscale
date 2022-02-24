@@ -29,12 +29,7 @@ func createPublicIp(d *OscDriver) error {
 			response, httpRes, response_error = oscApi.client.PublicIpApi.CreatePublicIp(oscApi.context).CreatePublicIpRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -77,12 +72,7 @@ func linkPublicIp(d *OscDriver) error {
 			response, httpRes, response_error = oscApi.client.PublicIpApi.LinkPublicIp(oscApi.context).LinkPublicIpRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -129,12 +119,7 @@ func deletePublicIp(d *OscDriver, resourceId string) error {
 			_, httpRes, response_error = oscApi.client.PublicIpApi.DeletePublicIp(oscApi.context).DeletePublicIpRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {

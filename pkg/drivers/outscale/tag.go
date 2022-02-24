@@ -38,12 +38,7 @@ func addTag(d *OscDriver, resourceId string, key string, value string) error {
 			_, httpRes, response_error = oscApi.client.TagApi.CreateTags(oscApi.context).CreateTagsRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {

@@ -63,8 +63,13 @@ By default, a security group will be created with theses rules
 | Inbound | TCP | 2379 | 2380 | 0.0.0.0/0 | ETCD (client request and peer communication)
 | Inbound | TCP | 6443 | 6443 | 0.0.0.0/0 | Kube-api 
 | Inbound | TCP | 10250 | 10250 | 0.0.0.0/0 | Kubelet
+| Inbound | TCP | 10251 | 10251 | 0.0.0.0/0 | Kube-scheduler
+| Inbound | TCP | 10252 | 10252 | 0.0.0.0/0 | Kube-controller-manager
+| Inbound | TCP | 10256 | 10256 | 0.0.0.0/0 | Kube-proxy
 | Inbound | TCP | 30000 | 32767 | 0.0.0.0/0 | Node port
 | Inbound | UDP | 30000 | 32767 | 0.0.0.0/0 | Node port
+| Inbound | UDP | 8472 | 8472 | 0.0.0.0/0 | Canal/Flannel overlay
+| Inbound | UDP | 4789 | 4789 | 0.0.0.0/0 | Canal/Flannel overlay
 
 
 ## Debugging

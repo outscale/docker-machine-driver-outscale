@@ -17,7 +17,10 @@ var (
 	nginxIngressHttpPort  int32 = 80
 	nginxIngressHttpsPort int32 = 443
 	nodePort                    = []int32{30000, 32767}
-	kubePort              int32 = 10250
+	kubePort                    = []int32{10250, 10252} // kube-scheduler and kube-controller-manager
+	kubeProxyPort         int32 = 10256
+	canal1                int32 = 8472 // Canal/Flannel VXLAN overlay networking
+	canal2                int32 = 4789 // Flannel VXLAN overlay networking
 )
 
 func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurityGroupRuleRequest) error {
@@ -161,7 +164,26 @@ func createSecurityGroup(d *OscDriver) error {
 	}
 
 	// Kube Port
-	ruleRequest = buildSecurityGroupRule("tcp", "Inbound", d.SecurityGroupId, kubePort, kubePort, "0.0.0.0/0")
+	ruleRequest = buildSecurityGroupRule("tcp", "Inbound", d.SecurityGroupId, kubePort[0], kubePort[1], "0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, ruleRequest); err != nil {
+		log.Error("Error while adding the kube port rule in the SecurityGroup")
+		return err
+	}
+
+	ruleRequest = buildSecurityGroupRule("tcp", "Inbound", d.SecurityGroupId, kubeProxyPort, kubeProxyPort, "0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, ruleRequest); err != nil {
+		log.Error("Error while adding the kube port rule in the SecurityGroup")
+		return err
+	}
+
+	//Canal
+	ruleRequest = buildSecurityGroupRule("udp", "Inbound", d.SecurityGroupId, canal1, canal1, "0.0.0.0/0")
+	if err := addSecurityGroupRule(d, d.SecurityGroupId, ruleRequest); err != nil {
+		log.Error("Error while adding the kube port rule in the SecurityGroup")
+		return err
+	}
+
+	ruleRequest = buildSecurityGroupRule("udp", "Inbound", d.SecurityGroupId, canal2, canal2, "0.0.0.0/0")
 	if err := addSecurityGroupRule(d, d.SecurityGroupId, ruleRequest); err != nil {
 		log.Error("Error while adding the kube port rule in the SecurityGroup")
 		return err

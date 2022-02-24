@@ -138,12 +138,7 @@ func (d *OscDriver) Create() error {
 			createVmResponse, httpRes, response_error = oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -183,12 +178,7 @@ func (d *OscDriver) Create() error {
 			response, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 	if err != nil {
 		fmt.Printf("Error while submitting the Vm creation request: ")
@@ -331,12 +321,7 @@ func (d *OscDriver) GetState() (state.State, error) {
 			readVmResponse, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -381,12 +366,7 @@ func (d *OscDriver) PreCreateCheck() error {
 			_, httpRes, response_error = oscApi.client.AccountApi.ReadAccounts(oscApi.context).ReadAccountsRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -422,12 +402,7 @@ func (d *OscDriver) Remove() error {
 				_, httpRes, response_error = oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
 				return response_error
 			},
-			retry.Attempts(defaultThrottlingMaxAttempts),
-			retry.Delay(defaultThrottlingDelay),
-			retry.OnRetry(func(n uint, err error) {
-				log.Debug("Retry number %v after throttling.", n)
-			}),
-			retry.RetryIf(isThrottlingError),
+			defaultThrottlingRetryOption...,
 		)
 
 		if err != nil {
@@ -481,12 +456,7 @@ func (d *OscDriver) Restart() error {
 			_, httpRes, response_error = oscApi.client.VmApi.RebootVms(oscApi.context).RebootVmsRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -565,12 +535,7 @@ func (d *OscDriver) Start() error {
 			_, httpRes, response_error = oscApi.client.VmApi.StartVms(oscApi.context).StartVmsRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -609,12 +574,7 @@ func (d *OscDriver) innerStop(force bool) error {
 			_, httpRes, response_error = oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {

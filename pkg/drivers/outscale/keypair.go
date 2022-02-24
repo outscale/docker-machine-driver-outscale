@@ -61,12 +61,7 @@ func createKeyPair(d *OscDriver) error {
 			response, httpRes, response_error = oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {
@@ -107,12 +102,7 @@ func deleteKeyPair(d *OscDriver, keypairName string) error {
 			_, httpRes, response_error = oscApi.client.KeypairApi.DeleteKeypair(oscApi.context).DeleteKeypairRequest(request).Execute()
 			return response_error
 		},
-		retry.Attempts(defaultThrottlingMaxAttempts),
-		retry.Delay(defaultThrottlingDelay),
-		retry.OnRetry(func(n uint, err error) {
-			log.Debug("Retry number %v after throttling.", n)
-		}),
-		retry.RetryIf(isThrottlingError),
+		defaultThrottlingRetryOption...,
 	)
 
 	if err != nil {

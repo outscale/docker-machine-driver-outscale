@@ -86,3 +86,7 @@ func isThrottlingError(err error) bool {
 	}
 	return false
 }
+
+func cleanUp(d *OscDriver) {
+	d.Remove()
+}

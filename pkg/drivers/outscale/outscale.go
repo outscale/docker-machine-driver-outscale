@@ -110,6 +110,7 @@ func (d *OscDriver) Create() error {
 
 	// Create a keypair
 	if err := createKeyPair(d); err != nil {
+		cleanUp(d)
 		return err
 	}
 
@@ -117,6 +118,7 @@ func (d *OscDriver) Create() error {
 	if d.securityGroupIds == nil {
 		// Create default SG
 		if err := createDefaultSecurityGroup(d); err != nil {
+			cleanUp(d)
 			return err
 		}
 
@@ -125,6 +127,7 @@ func (d *OscDriver) Create() error {
 
 	// (TODO) Assign an Public IP
 	if err := createPublicIp(d); err != nil {
+		cleanUp(d)
 		return err
 	}
 	// Create an Instance
@@ -151,10 +154,12 @@ func (d *OscDriver) Create() error {
 		if httpRes != nil {
 			fmt.Printf(httpRes.Status)
 		}
+		cleanUp(d)
 		return err
 	}
 
 	if !createVmResponse.HasVms() || len(createVmResponse.GetVms()) != 1 {
+		cleanUp(d)
 		return errors.New("Error while creating the Vm: the number of VM created is wrong")
 	}
 
@@ -164,6 +169,7 @@ func (d *OscDriver) Create() error {
 	// Wait for the VM to be started
 	log.Debug("Waiting for the Vm to be running...")
 	if err := d.waitForState(d.VmId, "running"); err != nil {
+		cleanUp(d)
 		return errors.New("Error while waiting that the VM is running")
 	}
 
@@ -190,30 +196,36 @@ func (d *OscDriver) Create() error {
 		if httpRes != nil {
 			fmt.Printf(httpRes.Status)
 		}
+		cleanUp(d)
 		return err
 	}
 
 	if !response.HasVms() {
+		cleanUp(d)
 		return errors.New("Error while reading the VM: there is no VM")
 	}
 
 	// Link the Public Ip
 	if err := linkPublicIp(d); err != nil {
+		cleanUp(d)
 		return err
 	}
 
 	// Add the tag of the Vm name
 	if err := addTag(d, d.VmId, "name", d.GetMachineName()); err != nil {
+		cleanUp(d)
 		return err
 	}
 
 	// Add extra tags to the Instances
 	if err := addExtraTags(d, d.VmId, d.extraTagsAll); err != nil {
+		cleanUp(d)
 		return err
 	}
 
 	// Add extra tags only for the Instances
 	if err := addExtraTags(d, d.VmId, d.extraTagsInstances); err != nil {
+		cleanUp(d)
 		return err
 	}
 

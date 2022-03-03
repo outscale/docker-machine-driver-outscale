@@ -37,7 +37,7 @@ function run_bats() {
         # BATS returns non-zero to indicate the tests have failed, we shouldn't
         # necessarily bail in this case, so that's the reason for the e toggle.
         set +e
-        bats -x --verbose-run "$bats_file"
+        bats --show-output-of-passing-tests --print-output-on-failure --tap --timing --verbose-run "$bats_file"
         if [[ $? -ne 0 ]]; then
             EXIT_STATUS=1
         fi

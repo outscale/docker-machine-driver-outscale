@@ -69,7 +69,7 @@ func buildSecurityGroupRule(ipProtocol string, flow string, securityGroupId stri
 	return &securityGroupRuleRequest
 }
 
-func createSecurityGroup(d *OscDriver) error {
+func createDefaultSecurityGroup(d *OscDriver) error {
 	log.Debug("Creating the Security Group")
 
 	// Get the client
@@ -234,4 +234,42 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 	}
 
 	return nil
+}
+
+func isSecurityGroupExist(d *OscDriver, sgId string) (bool, error) {
+	log.Debugf("Chcek that the Security Group '%v' exists", sgId)
+
+	// Get the client
+	oscApi, err := d.getClient()
+	if err != nil {
+		return false, err
+	}
+
+	request := osc.ReadSecurityGroupsRequest{
+		Filters: &osc.FiltersSecurityGroup{
+			SecurityGroupIds: &[]string{sgId},
+		},
+	}
+
+	var httpRes *http.Response
+	var response osc.ReadSecurityGroupsResponse
+	err = retry.Do(
+		func() error {
+			var response_error error
+			response, httpRes, response_error = oscApi.client.SecurityGroupApi.ReadSecurityGroups(oscApi.context).ReadSecurityGroupsRequest(request).Execute()
+			return response_error
+		},
+		defaultThrottlingRetryOption...,
+	)
+
+	if err != nil {
+		log.Error("Error while submitting the Security Group Rule read request: ")
+		if httpRes != nil {
+			fmt.Printf(httpRes.Status)
+		}
+		return false, err
+	}
+
+	log.Debugf("Has %v", response.HasSecurityGroups())
+	return response.HasSecurityGroups(), nil
 }

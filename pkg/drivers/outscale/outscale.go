@@ -30,6 +30,7 @@ const (
 	flagSourceOmi          = "outscale-source-omi"
 	flagExtraTagsAll       = "outscale-extra-tags-all"
 	flagExtraTagsInstances = "outscale-extra-tags-instances"
+	flagSecurityGroupIds   = "outscale-security-group-ids"
 )
 
 type OscDriver struct {
@@ -52,6 +53,7 @@ type OscDriver struct {
 	sourceOmi          string
 	extraTagsAll       []string
 	extraTagsInstances []string
+	securityGroupIds   []string
 }
 
 type OscApiData struct {
@@ -112,8 +114,13 @@ func (d *OscDriver) Create() error {
 	}
 
 	// Create a SG
-	if err := createSecurityGroup(d); err != nil {
-		return err
+	if d.securityGroupIds == nil {
+		// Create default SG
+		if err := createDefaultSecurityGroup(d); err != nil {
+			return err
+		}
+
+		d.securityGroupIds = []string{d.SecurityGroupId}
 	}
 
 	// (TODO) Assign an Public IP
@@ -122,12 +129,10 @@ func (d *OscDriver) Create() error {
 	}
 	// Create an Instance
 	createVmRequest := osc.CreateVmsRequest{
-		ImageId:     d.sourceOmi,
-		KeypairName: &d.KeypairName,
-		VmType:      &d.instanceType,
-		SecurityGroupIds: &[]string{
-			d.SecurityGroupId,
-		},
+		ImageId:          d.sourceOmi,
+		KeypairName:      &d.KeypairName,
+		VmType:           &d.instanceType,
+		SecurityGroupIds: &d.securityGroupIds,
 	}
 
 	var createVmResponse osc.CreateVmsResponse
@@ -266,6 +271,12 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Usage:  "Tags to set only to instances <key1=value1,key2=value2>",
 			Value:  nil,
 		},
+		mcnflag.StringSliceFlag{
+			EnvVar: "",
+			Name:   flagSecurityGroupIds,
+			Usage:  "Add machine into theses security groups",
+			Value:  nil,
+		},
 	}
 }
 
@@ -370,11 +381,25 @@ func (d *OscDriver) PreCreateCheck() error {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the ReadAcoount request: ")
+		fmt.Printf("Error while submitting the ReadAccount request: ")
 		if httpRes != nil {
 			fmt.Printf(httpRes.Status)
 		}
 		return err
+	}
+
+	// Check the SG
+	for _, sgId := range d.securityGroupIds {
+		sgExist, sgError := isSecurityGroupExist(d, sgId)
+		if sgError != nil {
+			return nil
+		}
+
+		if !sgExist {
+			return fmt.Errorf("The Security Group '%v' does not exist.", sgId)
+		}
+
+		log.Debugf("The Security Group '%v' exists.", sgId)
 	}
 
 	return nil
@@ -506,6 +531,9 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	if d.extraTagsInstances = flags.StringSlice(flagExtraTagsInstances); !validateExtraTagsFormat(d.extraTagsInstances) {
 		return fmt.Errorf("--%v have not the expected syntax.", flagExtraTagsInstances)
 	}
+
+	// Security Groups
+	d.securityGroupIds = flags.StringSlice(flagSecurityGroupIds)
 
 	// SSH
 	d.SSHKeyPath = d.GetSSHKeyPath()

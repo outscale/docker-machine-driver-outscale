@@ -27,6 +27,7 @@ var (
 			log.Debug("Retry number %v after throttling.", n)
 		}),
 		retry.RetryIf(isThrottlingError),
+		retry.LastErrorOnly(true),
 	}
 )
 

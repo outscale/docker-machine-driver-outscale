@@ -50,10 +50,11 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-source-omi`    | `OUTSCALE_SOURCE_OMI`    | ami-504e6b16 (Debian-10-2021.05.12-3) | Outscale Machine Image to use as bootstrap for the VM (see [here](https://docs.outscale.com/en/userguide/Official-OMIs-Reference.html#_supported_official_images)) |
 | `outscale-extra-tags-all` | `` | nil| Extra tags for all created resources. Format "key=value". Can be set multiple times
 | `outscale-extra-tags-instances` | `` | nil | Extra tags only for instances. Format "key=value". Can be set multiple times
+| `outscale-security-group-ids` | `` | nil | Ids of user defined Security Groups to add to the machine. Can be set multiple times
 
 
 ## Security group
-By default, a security group will be created with theses rules
+If no Security group is provided, a security group will be created with theses rules
 | Type | Protocol | From Port | To Port | CIDR | Description
 | --- | --- | --- | --- | --- | ---
 | Inbound | TCP | 22 | 22 | 0.0.0.0/0 | SSH

@@ -270,6 +270,5 @@ func isSecurityGroupExist(d *OscDriver, sgId string) (bool, error) {
 		return false, err
 	}
 
-	log.Debugf("Has %v", response.HasSecurityGroups())
-	return response.HasSecurityGroups(), nil
+	return response.HasSecurityGroups() && (len(response.GetSecurityGroups()) == 1), nil
 }

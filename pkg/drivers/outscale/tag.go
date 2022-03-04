@@ -80,6 +80,9 @@ func validateExtraTagsFormat(tags []string) bool {
 		if len(splittedTag) != 2 {
 			return false
 		}
+		if len(splittedTag[0]) == 0 {
+			return false
+		}
 	}
 	return true
 }

@@ -48,27 +48,17 @@ setup_file() {
 	res=$(osc-cli api ReadSecurityGroups --Filters "{ \"SecurityGroupIds\" : [\"$SGID\"], \"Tags\": [\"all1=valueall1\", \"all2=valueall2\"] }" | jq '.SecurityGroups | length')
 	[ "$res" == 1 ]
 
-	run machine stop $NAME
+	run machine rm -f $NAME
 	[ "$status" -eq 0 ]
 }
 
 @test "Tests wrong format of tags" {
-	run machine create -d outscale --outscale-extra-tags-all "all1valueall1"
+	run machine create -d outscale --outscale-extra-tags-all "all1valueall1" $NAME
 	[ "$status" -eq 1 ]
 
-	run machine create -d outscale --outscale-extra-tags-all "=all1valueall1"
+	run machine create -d outscale --outscale-extra-tags-all "=all1valueall1" $NAME
 	[ "$status" -eq 1 ]
 
-	run machine create -d outscale --outscale-extra-tags-all "all1=value=all1"
-	[ "$status" -eq 1 ]
-
-
-	run machine create -d outscale --outscale-extra-tags-instances "all1valueall1"
-	[ "$status" -eq 1 ]
-
-	run machine create -d outscale --outscale-extra-tags-instances "=all1valueall1"
-	[ "$status" -eq 1 ]
-
-	run machine create -d outscale --outscale-extra-tags-instances "all1=value=all1"
+	run machine create -d outscale --outscale-extra-tags-all "all1=value=all1" $NAME
 	[ "$status" -eq 1 ]
 }

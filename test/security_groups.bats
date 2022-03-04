@@ -81,7 +81,7 @@ teardown_file() {
 
 @test "Test with incorect security group id" {
 	run machine create -d outscale --outscale-security-group-ids "toto" $NAME
-	[ "$status" -eq 1 ]
+	[ "$status" -ne 0 ]
 }
 
 @test "Tests with good SG" {

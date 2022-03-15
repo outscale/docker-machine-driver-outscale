@@ -72,6 +72,9 @@ If no Security group is provided, a security group will be created with theses r
 | Inbound | UDP | 8472 | 8472 | 0.0.0.0/0 | Canal/Flannel overlay
 | Inbound | UDP | 4789 | 4789 | 0.0.0.0/0 | Canal/Flannel overlay
 
+In the example section, there are some exampe of minimal Security Group preprovisionned for different use-cased:
+- [Rancher Cluster with calico network](example/calico/README.md)
+- [Rancher Cluster with canal network](example/canal/README.md)
 
 ## Debugging
 Detailed run output will be emitted when using  the `docker-machine` `--debug` option.

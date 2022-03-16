@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/docker/machine v0.16.2
 	github.com/outscale/osc-sdk-go/v2 v2.7.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 )
 
 require (

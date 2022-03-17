@@ -16,7 +16,11 @@ jobs:
   Check:
     runs-on: ubuntu-latest
     steps:
+      # Retrieve the code from the repo (UNSAFE)
       - uses: actions/checkout@v2
+        with:
+            repository: ${{ github.event.pull_request.head.repo.full_name }}
+            ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -31,7 +35,11 @@ jobs:
     needs: Check
     runs-on: [self-hosted, linux]
     steps:
+      # Retrieve the code from the repo (UNSAFE)
       - uses: actions/checkout@v2
+        with:
+            repository: ${{ github.event.pull_request.head.repo.full_name }}
+            ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Go
         uses: actions/setup-go@v2
         with:

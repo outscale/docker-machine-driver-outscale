@@ -5,13 +5,13 @@ go 1.17
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/docker/machine v0.16.2
-	github.com/outscale/osc-sdk-go/v2 v2.8.0
+	github.com/outscale/osc-sdk-go/v2 v2.10.0
 	github.com/stretchr/testify v1.7.1
 )
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
-	github.com/aws/aws-sdk-go v1.43.18 // indirect
+	github.com/aws/aws-sdk-go v1.44.32 // indirect
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/docker/docker v20.10.11+incompatible // indirect
 	github.com/golang/protobuf v1.2.0 // indirect

@@ -6,13 +6,13 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/docker/machine v0.16.2
 	github.com/outscale/osc-sdk-go/v2 v2.8.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/aws/aws-sdk-go v1.43.18 // indirect
-	github.com/davecgh/go-spew v1.1.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/docker v20.10.11+incompatible // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -24,5 +24,5 @@ require (
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

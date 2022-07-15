@@ -16,12 +16,15 @@ import (
 )
 
 const (
-	defaultOscRegion   = "eu-west-2"
-	defaultOscOMI      = "ami-504e6b16"  // Debian
-	defaultOscVmType   = "tinav2.c1r2p3" //t2.small
-	defaultDockerPort  = 2376
-	defaultSSHPort     = 22
-	defaultSSHUsername = "outscale"
+	defaultOscRegion       = "eu-west-2"
+	defaultOscOMI          = "ami-504e6b16"  // Debian
+	defaultOscVmType       = "tinav2.c1r2p3" //t2.small
+	defaultDockerPort      = 2376
+	defaultSSHPort         = 22
+	defaultSSHUsername     = "outscale"
+	defaultRootDiskType    = "gp2"
+	defaultRootDiskSize    = 15
+	defaultRootDiskIo1Iops = 1500
 
 	flagAccessKey          = "outscale-access-key"
 	flagSecretKey          = "outscale-secret-key"
@@ -31,6 +34,9 @@ const (
 	flagExtraTagsAll       = "outscale-extra-tags-all"
 	flagExtraTagsInstances = "outscale-extra-tags-instances"
 	flagSecurityGroupIds   = "outscale-security-group-ids"
+	flagRootDiskType       = "outscale-root-disk-type"
+	flagRootDiskSize       = "outscale-root-disk-size"
+	flagRootDiskIo1Iops    = "outscale-root-disk-io1-iops"
 )
 
 type OscDriver struct {
@@ -54,6 +60,9 @@ type OscDriver struct {
 	extraTagsAll       []string
 	extraTagsInstances []string
 	securityGroupIds   []string
+	rootDiskType       string
+	rootDiskSize       int32
+	rootDiskIo1Iops    int32
 }
 
 type OscApiData struct {
@@ -131,11 +140,27 @@ func (d *OscDriver) Create() error {
 		return err
 	}
 	// Create an Instance
+	deviceName := "/dev/sda1"
+	rootDisk := osc.BlockDeviceMappingVmCreation{
+		Bsu: &osc.BsuToCreate{
+			VolumeType: &d.rootDiskType,
+			VolumeSize: &d.rootDiskSize,
+		},
+		DeviceName: &deviceName,
+	}
+
+	if d.rootDiskType == "io1" {
+		rootDisk.Bsu.SetIops(d.rootDiskIo1Iops)
+	}
+
 	createVmRequest := osc.CreateVmsRequest{
 		ImageId:          d.sourceOmi,
 		KeypairName:      &d.KeypairName,
 		VmType:           &d.instanceType,
 		SecurityGroupIds: &d.securityGroupIds,
+		BlockDeviceMappings: &[]osc.BlockDeviceMappingVmCreation{
+			rootDisk,
+		},
 	}
 
 	var createVmResponse osc.CreateVmsResponse
@@ -288,6 +313,24 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   flagSecurityGroupIds,
 			Usage:  "Add machine into theses security groups",
 			Value:  nil,
+		},
+		mcnflag.StringFlag{
+			EnvVar: "",
+			Name:   flagRootDiskType,
+			Usage:  "Type of volume for the root disk ('standard', 'io1' or 'gp2')",
+			Value:  defaultRootDiskType,
+		},
+		mcnflag.IntFlag{
+			EnvVar: "",
+			Name:   flagRootDiskSize,
+			Usage:  "Size of the root disk in GB",
+			Value:  defaultRootDiskSize,
+		},
+		mcnflag.IntFlag{
+			EnvVar: "",
+			Name:   flagRootDiskIo1Iops,
+			Usage:  "Iops for the io1 root disk type (ignore if it is not io1)",
+			Value:  defaultRootDiskIo1Iops,
 		},
 	}
 }
@@ -535,13 +578,21 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.instanceType = flags.String(flagInstanceType)
 	d.sourceOmi = flags.String(flagSourceOmi)
 
+	// Root disk
+	d.rootDiskType = flags.String(flagRootDiskType)
+	d.rootDiskSize = int32(flags.Int(flagRootDiskSize))
+	d.rootDiskIo1Iops = int32(flags.Int(flagRootDiskIo1Iops))
+	if !validateDiskType(d.rootDiskType) {
+		return fmt.Errorf("the disk type is not accepted (got: %s, expected: 'standard'|'io1'|'gp2')", d.rootDiskType)
+	}
+
 	// Tags
 	if d.extraTagsAll = flags.StringSlice(flagExtraTagsAll); !validateExtraTagsFormat(d.extraTagsAll) {
-		return fmt.Errorf("--%v have not the expected syntax.", flagExtraTagsAll)
+		return fmt.Errorf("--%v have not the expected syntax", flagExtraTagsAll)
 	}
 
 	if d.extraTagsInstances = flags.StringSlice(flagExtraTagsInstances); !validateExtraTagsFormat(d.extraTagsInstances) {
-		return fmt.Errorf("--%v have not the expected syntax.", flagExtraTagsInstances)
+		return fmt.Errorf("--%v have not the expected syntax", flagExtraTagsInstances)
 	}
 
 	// Security Groups
@@ -640,4 +691,13 @@ func (d *OscDriver) Stop() error {
 // Kill stops a host forcefully
 func (d *OscDriver) Kill() error {
 	return d.innerStop(true)
+}
+
+func validateDiskType(diskType string) bool {
+	switch diskType {
+	case "io1", "gp2", "standard":
+		return true
+	default:
+		return false
+	}
 }

@@ -72,3 +72,10 @@ func TestSetConfigDefaultRegion(t *testing.T) {
 	assert.Equal(t, defaultOscRegion, driver.Region)
 	assert.Empty(t, checkFlags.InvalidFlags)
 }
+
+func TestDiskType(t *testing.T) {
+	assert.Equal(t, true, validateDiskType("io1"))
+	assert.Equal(t, true, validateDiskType("standard"))
+	assert.Equal(t, true, validateDiskType("gp2"))
+	assert.Equal(t, false, validateDiskType("notADiskType"))
+}

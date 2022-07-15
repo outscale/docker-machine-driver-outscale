@@ -51,6 +51,9 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-extra-tags-all` | `` | nil| Extra tags for all created resources. Format "key=value". Can be set multiple times
 | `outscale-extra-tags-instances` | `` | nil | Extra tags only for instances. Format "key=value". Can be set multiple times
 | `outscale-security-group-ids` | `` | nil | Ids of user defined Security Groups to add to the machine. Can be set multiple times
+| `outscale-root-disk-type` | `` | gp2 | Type of volume for the root disk ('standard', 'io1' or 'gp2')
+| `outscale-root-disk-size` | `` | 15 | Size of the root disk in GB
+| `outscale-root-disk-io1-iops` | `` | 1500 | Iops for the io1 root disk type (ignore if it is not io1)
 
 
 ## Security group

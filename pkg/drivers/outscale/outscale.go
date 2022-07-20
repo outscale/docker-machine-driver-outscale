@@ -323,13 +323,13 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.IntFlag{
 			EnvVar: "",
 			Name:   flagRootDiskSize,
-			Usage:  "Size of the root disk in GB",
+			Usage:  "Size of the root disk in GB (> 0)",
 			Value:  defaultRootDiskSize,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "",
 			Name:   flagRootDiskIo1Iops,
-			Usage:  "Iops for the io1 root disk type (ignore if it is not io1)",
+			Usage:  "Iops for the io1 root disk type (ignore if it is not io1). Value between 1 and 13000.",
 			Value:  defaultRootDiskIo1Iops,
 		},
 	}
@@ -580,10 +580,15 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 
 	// Root disk
 	d.rootDiskType = flags.String(flagRootDiskType)
-	d.rootDiskSize = int32(flags.Int(flagRootDiskSize))
-	d.rootDiskIo1Iops = int32(flags.Int(flagRootDiskIo1Iops))
 	if !validateDiskType(d.rootDiskType) {
 		return fmt.Errorf("the disk type is not accepted (got: %s, expected: 'standard'|'io1'|'gp2')", d.rootDiskType)
+	}
+	if d.rootDiskSize = int32(flags.Int(flagRootDiskSize)); d.rootDiskSize <= 0 {
+		return fmt.Errorf("the disk size (%v) is not accepted, it must be > 0", d.rootDiskSize)
+	}
+
+	if d.rootDiskIo1Iops = int32(flags.Int(flagRootDiskIo1Iops)); d.rootDiskIo1Iops <= 0 {
+		return fmt.Errorf("the disk iops (%v) is not accepted, it must between 1 and 13000", d.rootDiskIo1Iops)
 	}
 
 	// Tags

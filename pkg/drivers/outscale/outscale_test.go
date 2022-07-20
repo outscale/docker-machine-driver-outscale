@@ -79,3 +79,51 @@ func TestDiskType(t *testing.T) {
 	assert.Equal(t, true, validateDiskType("gp2"))
 	assert.Equal(t, false, validateDiskType("notADiskType"))
 }
+
+func TestDiskSize(t *testing.T) {
+	os.Clearenv()
+	driver := NewDriver("", "")
+
+	os.Setenv("OSC_ACCESS_KEY", "OSC_ACCESS_KEY")
+	os.Setenv("OSC_SECRET_KEY", "OSC_SECRET_KEY")
+
+	checkFlags := &drivers.CheckDriverOptions{
+		FlagsValues: map[string]interface{}{
+			flagRootDiskSize: -1,
+		},
+		CreateFlags: driver.GetCreateFlags(),
+	}
+
+	err := driver.SetConfigFromFlags(checkFlags)
+	assert.Error(t, err)
+	assert.Equal(t, "the disk size (-1) is not accepted, it must be > 0", err.Error())
+
+	checkFlags.FlagsValues[flagRootDiskSize] = 12
+	err = driver.SetConfigFromFlags(checkFlags)
+	assert.NoError(t, err)
+
+}
+
+func TestDiskIops(t *testing.T) {
+	os.Clearenv()
+	driver := NewDriver("", "")
+
+	os.Setenv("OSC_ACCESS_KEY", "OSC_ACCESS_KEY")
+	os.Setenv("OSC_SECRET_KEY", "OSC_SECRET_KEY")
+
+	checkFlags := &drivers.CheckDriverOptions{
+		FlagsValues: map[string]interface{}{
+			flagRootDiskIo1Iops: -1,
+		},
+		CreateFlags: driver.GetCreateFlags(),
+	}
+
+	err := driver.SetConfigFromFlags(checkFlags)
+	assert.Error(t, err)
+	assert.Equal(t, "the disk iops (-1) is not accepted, it must between 1 and 13000", err.Error())
+
+	checkFlags.FlagsValues[flagRootDiskIo1Iops] = 12
+	err = driver.SetConfigFromFlags(checkFlags)
+	assert.NoError(t, err)
+
+}

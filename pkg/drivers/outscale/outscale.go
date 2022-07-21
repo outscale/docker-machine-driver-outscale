@@ -36,7 +36,7 @@ const (
 	flagSecurityGroupIds   = "outscale-security-group-ids"
 	flagRootDiskType       = "outscale-root-disk-type"
 	flagRootDiskSize       = "outscale-root-disk-size"
-	flagRootDiskIo1Iops    = "outscale-root-disk-io1-iops"
+	flagRootDiskIo1Iops    = "outscale-root-disk-iops"
 )
 
 type OscDriver struct {

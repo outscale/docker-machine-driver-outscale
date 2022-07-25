@@ -17,7 +17,7 @@ import (
 
 const (
 	defaultOscRegion       = "eu-west-2"
-	defaultOscOMI          = "ami-95dc8ac6"  // Debian 10
+	defaultOscOMI          = "ami-2cf1fa3e"  // Debian 10
 	defaultOscVmType       = "tinav2.c1r2p3" //t2.small
 	defaultDockerPort      = 2376
 	defaultSSHPort         = 22

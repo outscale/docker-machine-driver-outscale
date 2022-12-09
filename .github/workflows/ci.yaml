@@ -66,3 +66,4 @@ jobs:
           OSC_ACCESS_KEY: ${{ secrets.OSC_ACCESS_KEY }}
           OSC_SECRET_KEY: ${{ secrets.OSC_SECRET_KEY }}
           OSC_REGION: ${{ secrets.OSC_REGION }}
+          OUTSCALE_SOURCE_OMI: ${{ secrets.OMI_ID }}

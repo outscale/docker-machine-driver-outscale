@@ -1,6 +1,6 @@
 module github.com/outscale-dev/docker-machine-driver-outscale
 
-go 1.17
+go 1.19
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible

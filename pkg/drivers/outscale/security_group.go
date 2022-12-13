@@ -79,6 +79,10 @@ func createDefaultSecurityGroup(d *OscDriver) error {
 		SecurityGroupName: fmt.Sprintf("docker-machine-%s-%d", d.GetMachineName(), time.Now().Unix()),
 	}
 
+	if ! d.PublicCloud {
+		request.SetNetId(d.netId)
+	}
+
 	var httpRes *http.Response
 	var response osc.CreateSecurityGroupResponse
 	err = retry.Do(

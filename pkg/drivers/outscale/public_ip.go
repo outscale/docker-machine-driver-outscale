@@ -33,11 +33,7 @@ func createPublicIp(d *OscDriver) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Public IP creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Public IP creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasPublicIp() {
@@ -76,11 +72,7 @@ func linkPublicIp(d *OscDriver) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Public IP link request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Public IP link request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasLinkPublicIpId() {
@@ -123,11 +115,7 @@ func deletePublicIp(d *OscDriver, resourceId string) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Public IP link deletion request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Public IP link deletion request: %s", getErrorInfo(err, httpRes))
 	}
 
 	return nil

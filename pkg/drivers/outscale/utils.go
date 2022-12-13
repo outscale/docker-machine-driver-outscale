@@ -3,6 +3,7 @@ package outscale
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -49,11 +50,7 @@ func (d *OscDriver) waitForState(vmId string, state string) error {
 
 			readVmResponse, httpRes, err := oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
 			if err != nil {
-				fmt.Printf("Error while submitting the Vm creation request: ")
-				if httpRes != nil {
-					fmt.Printf(httpRes.Status)
-				}
-				return err
+				return fmt.Errorf("Error while submitting the Vm read request: %s", getErrorInfo(err, httpRes))
 			}
 
 			if !readVmResponse.HasVms() {
@@ -90,4 +87,28 @@ func isThrottlingError(err error) bool {
 
 func cleanUp(d *OscDriver) {
 	d.Remove()
+}
+
+
+func extractApiError(err error) (bool, *osc.ErrorResponse) {
+	genericError, ok := err.(osc.GenericOpenAPIError)
+	if ok {
+		errorsResponse, ok := genericError.Model().(osc.ErrorResponse)
+		if ok {
+			return true, &errorsResponse
+		}
+		return false, nil
+	}
+	return false, nil
+}
+
+func getErrorInfo(err error, httpRes *http.Response) string {
+	if ok, apiError := extractApiError(err); ok {
+		return fmt.Sprintf("%v - '%v %v' - '%v'", httpRes.Status, apiError.GetErrors()[0].GetCode(), apiError.GetErrors()[0].GetType(), apiError.GetErrors()[0].GetDetails())
+	}
+	if httpRes != nil {
+		return httpRes.Status
+	}
+
+	return fmt.Sprintf("%v", err)
 }

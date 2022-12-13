@@ -42,11 +42,7 @@ func addTag(d *OscDriver, resourceId string, key string, value string) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the CreateTag request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the CreateTag request: %s", getErrorInfo(err, httpRes))
 	}
 
 	return nil

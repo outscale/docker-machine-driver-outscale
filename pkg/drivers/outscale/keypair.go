@@ -65,11 +65,7 @@ func createKeyPair(d *OscDriver) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Keypair creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Keypair creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasKeypair() {
@@ -106,11 +102,7 @@ func deleteKeyPair(d *OscDriver, keypairName string) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Keypair deletetion request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Keypair deletetion request:  %s", getErrorInfo(err, httpRes))
 	}
 
 	return nil

@@ -175,12 +175,8 @@ func (d *OscDriver) Create() error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Vm creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
 		cleanUp(d)
-		return err
+		return fmt.Errorf("Error while submitting the Vm creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !createVmResponse.HasVms() || len(createVmResponse.GetVms()) != 1 {
@@ -217,12 +213,8 @@ func (d *OscDriver) Create() error {
 		defaultThrottlingRetryOption...,
 	)
 	if err != nil {
-		fmt.Printf("Error while submitting the Vm creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
 		cleanUp(d)
-		return err
+		return fmt.Errorf("Error while submitting the Vm read request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasVms() {
@@ -391,11 +383,7 @@ func (d *OscDriver) GetState() (state.State, error) {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the Vm creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return state.None, err
+		return state.None, fmt.Errorf("Error while submitting the Vm creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !readVmResponse.HasVms() {
@@ -436,11 +424,7 @@ func (d *OscDriver) PreCreateCheck() error {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the ReadAccount request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the ReadAccount request: %s", getErrorInfo(err, httpRes))
 	}
 
 	// Check the SG
@@ -486,11 +470,7 @@ func (d *OscDriver) Remove() error {
 		)
 
 		if err != nil {
-			fmt.Printf("Error while submitting the DeleteVm request: ")
-			if httpRes != nil {
-				fmt.Printf(httpRes.Status)
-			}
-			return err
+			return fmt.Errorf("Error while submitting the DeleteVm request: %s", getErrorInfo(err, httpRes))
 		}
 
 		if err := d.waitForState(d.VmId, "terminated"); err != nil {
@@ -540,11 +520,7 @@ func (d *OscDriver) Restart() error {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the RebootVm request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the RebootVm request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if err := d.waitForState(d.VmId, "running"); err != nil {
@@ -635,11 +611,7 @@ func (d *OscDriver) Start() error {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the StartVm request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the StartVm request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if err := d.waitForState(d.VmId, "running"); err != nil {
@@ -674,11 +646,7 @@ func (d *OscDriver) innerStop(force bool) error {
 	)
 
 	if err != nil {
-		fmt.Printf("Error while submitting the StopVm request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the StopVm request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if err := d.waitForState(d.VmId, "stopped"); err != nil {

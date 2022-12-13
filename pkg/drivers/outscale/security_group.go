@@ -42,11 +42,7 @@ func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurity
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Security Group Rule creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Security Group Rule creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasSecurityGroup() {
@@ -95,11 +91,7 @@ func createDefaultSecurityGroup(d *OscDriver) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Security Group creation request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Security Group creation request: %s", getErrorInfo(err, httpRes))
 	}
 
 	if !response.HasSecurityGroup() {
@@ -226,11 +218,7 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Security Group deletion request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return err
+		return fmt.Errorf("Error while submitting the Security Group deletion request: %s", getErrorInfo(err, httpRes))
 	}
 
 	return nil
@@ -263,11 +251,7 @@ func isSecurityGroupExist(d *OscDriver, sgId string) (bool, error) {
 	)
 
 	if err != nil {
-		log.Error("Error while submitting the Security Group Rule read request: ")
-		if httpRes != nil {
-			fmt.Printf(httpRes.Status)
-		}
-		return false, err
+		return false, fmt.Errorf("Error while submitting the Security Group Rule read request: %s", getErrorInfo(err, httpRes))
 	}
 
 	return response.HasSecurityGroups() && (len(response.GetSecurityGroups()) == 1), nil

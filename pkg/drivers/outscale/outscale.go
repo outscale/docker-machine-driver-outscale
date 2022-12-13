@@ -37,6 +37,7 @@ const (
 	flagRootDiskType       = "outscale-root-disk-type"
 	flagRootDiskSize       = "outscale-root-disk-size"
 	flagRootDiskIo1Iops    = "outscale-root-disk-iops"
+	flagSubnetId           = "outscale-subnet-id"
 )
 
 type OscDriver struct {
@@ -53,6 +54,7 @@ type OscDriver struct {
 	KeypairName     string
 	SecurityGroupId string
 	PublicIpId      string
+	PublicCloud     bool
 
 	// Unstored
 	instanceType       string
@@ -63,6 +65,8 @@ type OscDriver struct {
 	rootDiskType       string
 	rootDiskSize       int32
 	rootDiskIo1Iops    int32
+	subnetId           string
+	netId              string
 }
 
 type OscApiData struct {
@@ -135,10 +139,13 @@ func (d *OscDriver) Create() error {
 	}
 
 	// (TODO) Assign an Public IP
-	if err := createPublicIp(d); err != nil {
-		cleanUp(d)
-		return err
+	if d.PublicCloud {
+		if err := createPublicIp(d); err != nil {
+			cleanUp(d)
+			return err
+		}
 	}
+
 	// Create an Instance
 	deviceName := "/dev/sda1"
 	rootDisk := osc.BlockDeviceMappingVmCreation{
@@ -161,6 +168,10 @@ func (d *OscDriver) Create() error {
 		BlockDeviceMappings: &[]osc.BlockDeviceMappingVmCreation{
 			rootDisk,
 		},
+	}
+
+	if !d.PublicCloud {
+		createVmRequest.SetSubnetId(d.subnetId)
 	}
 
 	var createVmResponse osc.CreateVmsResponse
@@ -222,10 +233,14 @@ func (d *OscDriver) Create() error {
 		return errors.New("Error while reading the VM: there is no VM")
 	}
 
-	// Link the Public Ip
-	if err := linkPublicIp(d); err != nil {
-		cleanUp(d)
-		return err
+	if d.PublicCloud {
+		// Link the Public Ip
+		if err := linkPublicIp(d); err != nil {
+			cleanUp(d)
+			return err
+		}
+	} else {
+		d.IPAddress = response.GetVms()[0].GetPrivateIp()
 	}
 
 	// Add the tag of the Vm name
@@ -323,6 +338,12 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   flagRootDiskIo1Iops,
 			Usage:  "Iops for the io1 root disk type (ignore if it is not io1). Value between 1 and 13000.",
 			Value:  defaultRootDiskIo1Iops,
+		},
+		mcnflag.StringFlag{
+			EnvVar: "",
+			Name:   flagSubnetId,
+			Usage:  "Id of the Net use to create all resources when a private network is requested",
+			Value:  "",
 		},
 	}
 }
@@ -431,7 +452,7 @@ func (d *OscDriver) PreCreateCheck() error {
 	for _, sgId := range d.securityGroupIds {
 		sgExist, sgError := isSecurityGroupExist(d, sgId)
 		if sgError != nil {
-			return nil
+			return sgError
 		}
 
 		if !sgExist {
@@ -439,6 +460,22 @@ func (d *OscDriver) PreCreateCheck() error {
 		}
 
 		log.Debugf("The Security Group '%v' exists.", sgId)
+	}
+
+	// Check the SubnetId
+	if !d.PublicCloud {
+		netId, err := RetrieveNetFromSubnetId(d, d.subnetId)
+		if err != nil {
+			return err
+		}
+
+		if len(netId) == 0 {
+			return fmt.Errorf("The Subnet Id '%v' does not exist.", d.subnetId)
+		}
+
+		d.netId = netId
+
+		log.Debugf("The Subnet Id '%v' exists in NetId '%v'", d.subnetId, d.netId)
 	}
 
 	return nil
@@ -578,6 +615,10 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 
 	// Security Groups
 	d.securityGroupIds = flags.StringSlice(flagSecurityGroupIds)
+
+	// Private or Public Cloud
+	d.subnetId = flags.String(flagSubnetId)
+	d.PublicCloud = len(d.subnetId) == 0
 
 	// SSH
 	d.SSHKeyPath = d.GetSSHKeyPath()

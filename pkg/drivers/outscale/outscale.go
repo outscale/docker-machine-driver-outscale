@@ -592,7 +592,7 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	}
 
 	if d.Sk = flags.String(flagSecretKey); d.Sk == "" {
-		if d.Sk = os.Getenv("OSC_SECRET_KEY"); d.Ak == "" {
+		if d.Sk = os.Getenv("OSC_SECRET_KEY"); d.Sk == "" {
 			return errors.New("Outscale Secret key is required")
 		}
 	}

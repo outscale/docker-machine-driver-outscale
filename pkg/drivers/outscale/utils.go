@@ -30,6 +30,9 @@ var (
 		retry.RetryIf(isThrottlingError),
 		retry.LastErrorOnly(true),
 	}
+
+	// Throtlling
+	ThrottlingErrors = []int{503, 429}
 )
 
 func (d *OscDriver) waitForState(vmId string, state string) error {
@@ -78,8 +81,10 @@ func (d *OscDriver) waitForState(vmId string, state string) error {
 
 func isThrottlingError(err error) bool {
 	if err != nil {
-		if strings.Contains(fmt.Sprint(err), "RequestLimitExceeded:") {
-			return true
+		for _, errorCode := range ThrottlingErrors {
+			if strings.Contains(fmt.Sprint(errorCode), fmt.Sprint(err)) {
+				return true
+			}
 		}
 	}
 	return false
@@ -88,7 +93,6 @@ func isThrottlingError(err error) bool {
 func cleanUp(d *OscDriver) {
 	d.Remove()
 }
-
 
 func extractApiError(err error) (bool, *osc.ErrorResponse) {
 	genericError, ok := err.(osc.GenericOpenAPIError)

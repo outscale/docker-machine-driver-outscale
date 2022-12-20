@@ -5,10 +5,6 @@
 
 Outscale Driver plugin for docker-machine
 
-## TODO
-- [ ] Allow private IP / VPC
-- [ ] Handle additional parameters (KeyPair, VPC, SG)
-
 ## Install
 If you would rather build from source, you will need to have a working `go` 1.17+ environment,
 
@@ -54,6 +50,7 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-root-disk-type` | `` | gp2 | Type of volume for the root disk ('standard', 'io1' or 'gp2')
 | `outscale-root-disk-size` | `` | 15 | Size of the root disk in GB (> 0)
 | `outscale-root-disk-iops` | `` | 1500 | Iops for the io1 root disk type (ignore if it is not io1). Value between 1 and 13000.
+| `outscale-subnet-id` | `` | `` | Id of the Net use to create all resources when a private network is requested.
 
 
 ## Security group

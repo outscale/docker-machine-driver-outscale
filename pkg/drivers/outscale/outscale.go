@@ -38,6 +38,7 @@ const (
 	flagRootDiskSize       = "outscale-root-disk-size"
 	flagRootDiskIo1Iops    = "outscale-root-disk-iops"
 	flagSubnetId           = "outscale-subnet-id"
+	flagK8sNodeNameTag     = "outscale-k8s-node-name-autotag"
 )
 
 type OscDriver struct {
@@ -67,6 +68,7 @@ type OscDriver struct {
 	rootDiskIo1Iops    int32
 	subnetId           string
 	netId              string
+	tagK8sNodeName     bool
 }
 
 type OscApiData struct {
@@ -249,6 +251,14 @@ func (d *OscDriver) Create() error {
 		return err
 	}
 
+	if d.tagK8sNodeName {
+		// Add the tag of the Vm name
+		if err := addTag(d, d.VmId, "OscK8sNodeName", d.GetMachineName()); err != nil {
+			cleanUp(d)
+			return err
+		}
+	}
+
 	// Add extra tags to the Instances
 	if err := addExtraTags(d, d.VmId, d.extraTagsAll); err != nil {
 		cleanUp(d)
@@ -344,6 +354,11 @@ func (d *OscDriver) GetCreateFlags() []mcnflag.Flag {
 			Name:   flagSubnetId,
 			Usage:  "Id of the Net use to create all resources when a private network is requested",
 			Value:  "",
+		},
+		mcnflag.BoolFlag{
+			EnvVar: "",
+			Name:   flagK8sNodeNameTag,
+			Usage:  "Automatically add kubernetes tag 'OscK8sNodeName' to the instance (Useful for the CCM)",
 		},
 	}
 }
@@ -612,6 +627,8 @@ func (d *OscDriver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	if d.extraTagsInstances = flags.StringSlice(flagExtraTagsInstances); !validateExtraTagsFormat(d.extraTagsInstances) {
 		return fmt.Errorf("--%v have not the expected syntax", flagExtraTagsInstances)
 	}
+
+	d.tagK8sNodeName = flags.Bool(flagK8sNodeNameTag)
 
 	// Security Groups
 	d.securityGroupIds = flags.StringSlice(flagSecurityGroupIds)

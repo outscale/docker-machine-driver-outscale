@@ -51,6 +51,7 @@ docker-machine create -d outscale --outscale-access-key=<outscale-access-key>  -
 | `outscale-root-disk-size` | `` | 15 | Size of the root disk in GB (> 0)
 | `outscale-root-disk-iops` | `` | 1500 | Iops for the io1 root disk type (ignore if it is not io1). Value between 1 and 13000.
 | `outscale-subnet-id` | `` | `` | Id of the Net use to create all resources when a private network is requested.
+| `outscale-k8s-node-name-autotag` | `` | false | Automatically add kubernetes tag 'OscK8sNodeName' to the instance (Useful for the CCM).
 
 
 ## Security group

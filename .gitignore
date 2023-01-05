@@ -1,4 +1,12 @@
 
 # Build folder
 out/
+.docker/
+dist/
+test/bats.log
 
+# terraform
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform

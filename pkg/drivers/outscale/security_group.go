@@ -36,7 +36,7 @@ func addSecurityGroupRule(d *OscDriver, sgId string, request *osc.CreateSecurity
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.SecurityGroupRuleApi.CreateSecurityGroupRule(oscApi.context).CreateSecurityGroupRuleRequest(*request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -89,7 +89,7 @@ func createDefaultSecurityGroup(d *OscDriver) error {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.SecurityGroupApi.CreateSecurityGroup(oscApi.context).CreateSecurityGroupRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -216,7 +216,7 @@ func deleteSecurityGroup(d *OscDriver, resourceId string) error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.SecurityGroupApi.DeleteSecurityGroup(oscApi.context).DeleteSecurityGroupRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -249,7 +249,7 @@ func isSecurityGroupExist(d *OscDriver, sgId string) (bool, error) {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.SecurityGroupApi.ReadSecurityGroups(oscApi.context).ReadSecurityGroupsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)

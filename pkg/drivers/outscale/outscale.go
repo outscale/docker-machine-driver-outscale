@@ -38,7 +38,7 @@ const (
 	flagRootDiskSize       = "outscale-root-disk-size"
 	flagRootDiskIo1Iops    = "outscale-root-disk-iops"
 	flagSubnetId           = "outscale-subnet-id"
-	flagK8sNodeNameTag     = "outscale-k8s-node-name-autotag"
+	flagK8sNodeNameTag     = "outscale-kubernetes-node-name-autotag"
 )
 
 type OscDriver struct {

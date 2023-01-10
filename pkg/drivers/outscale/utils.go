@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -80,9 +79,13 @@ func (d *OscDriver) waitForState(vmId string, state string) error {
 }
 
 func isThrottlingError(err error) bool {
-	if err != nil {
+	cloudError, ok := err.(CloudError)
+	if ! ok {
+		return false
+	}
+	if cloudError.httpRes != nil {
 		for _, errorCode := range ThrottlingErrors {
-			if strings.Contains(fmt.Sprint(errorCode), fmt.Sprint(err)) {
+			if errorCode == cloudError.httpRes.StatusCode {
 				return true
 			}
 		}
@@ -115,4 +118,24 @@ func getErrorInfo(err error, httpRes *http.Response) string {
 	}
 
 	return fmt.Sprintf("%v", err)
+}
+
+type CloudError struct {
+	httpRes *http.Response
+	cloudError error
+}
+
+func (e CloudError) Error() string {
+    return getErrorInfo(e.cloudError, e.httpRes)
+}
+
+func wrapError(err error, httpRes *http.Response) error {
+	if err == nil {
+		return nil
+	}
+
+	return CloudError{
+		httpRes: httpRes,
+		cloudError: err,
+	}
 }

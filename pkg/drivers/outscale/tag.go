@@ -36,7 +36,7 @@ func addTag(d *OscDriver, resourceId string, key string, value string) error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.TagApi.CreateTags(oscApi.context).CreateTagsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)

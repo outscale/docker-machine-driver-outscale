@@ -182,7 +182,7 @@ func (d *OscDriver) Create() error {
 		func() error {
 			var response_error error
 			createVmResponse, httpRes, response_error = oscApi.client.VmApi.CreateVms(oscApi.context).CreateVmsRequest(createVmRequest).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -221,7 +221,7 @@ func (d *OscDriver) Create() error {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -413,7 +413,7 @@ func (d *OscDriver) GetState() (state.State, error) {
 		func() error {
 			var response_error error
 			readVmResponse, httpRes, response_error = oscApi.client.VmApi.ReadVms(oscApi.context).ReadVmsRequest(readVmRequest).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -454,7 +454,7 @@ func (d *OscDriver) PreCreateCheck() error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.AccountApi.ReadAccounts(oscApi.context).ReadAccountsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -516,7 +516,7 @@ func (d *OscDriver) Remove() error {
 			func() error {
 				var response_error error
 				_, httpRes, response_error = oscApi.client.VmApi.DeleteVms(oscApi.context).DeleteVmsRequest(request).Execute()
-				return response_error
+				return wrapError(response_error, httpRes)
 			},
 			defaultThrottlingRetryOption...,
 		)
@@ -566,7 +566,7 @@ func (d *OscDriver) Restart() error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.VmApi.RebootVms(oscApi.context).RebootVmsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -663,7 +663,7 @@ func (d *OscDriver) Start() error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.VmApi.StartVms(oscApi.context).StartVmsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -698,7 +698,7 @@ func (d *OscDriver) innerStop(force bool) error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.VmApi.StopVms(oscApi.context).StopVmsRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)

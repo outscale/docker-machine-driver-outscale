@@ -27,7 +27,7 @@ func createPublicIp(d *OscDriver) error {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.PublicIpApi.CreatePublicIp(oscApi.context).CreatePublicIpRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -66,7 +66,7 @@ func linkPublicIp(d *OscDriver) error {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.PublicIpApi.LinkPublicIp(oscApi.context).LinkPublicIpRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -109,7 +109,7 @@ func deletePublicIp(d *OscDriver, resourceId string) error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.PublicIpApi.DeletePublicIp(oscApi.context).DeletePublicIpRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)

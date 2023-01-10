@@ -59,7 +59,7 @@ func createKeyPair(d *OscDriver) error {
 		func() error {
 			var response_error error
 			response, httpRes, response_error = oscApi.client.KeypairApi.CreateKeypair(oscApi.context).CreateKeypairRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)
@@ -96,7 +96,7 @@ func deleteKeyPair(d *OscDriver, keypairName string) error {
 		func() error {
 			var response_error error
 			_, httpRes, response_error = oscApi.client.KeypairApi.DeleteKeypair(oscApi.context).DeleteKeypairRequest(request).Execute()
-			return response_error
+			return wrapError(response_error, httpRes)
 		},
 		defaultThrottlingRetryOption...,
 	)

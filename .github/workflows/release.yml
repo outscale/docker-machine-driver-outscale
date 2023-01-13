@@ -29,6 +29,13 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSWORD }}
 
+      - name: Get changelog for release
+        id: changelog
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          path: "docs/CHANGELOG.md"
+          version: ${{ github.ref_name }}
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -38,3 +45,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+          body: ${{ steps.changelog.outputs.changes }}
+          files: |
+            dist/docker-machine-driver-outscale*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

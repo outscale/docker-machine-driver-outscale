@@ -2,6 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/outscale-dev/docker-machine-driver-outscale)](https://goreportcard.com/report/github.com/outscale-dev/docker-machine-driver-outscale)
 [![GitHub release](https://img.shields.io/github/release/outscale-dev/docker-machine-driver-outscale.svg)](https://github.com/outscale-dev/docker-machine-driver-outscale/releases/)
+[![Project Graduated](https://docs.outscale.com/fr/userguide/_images/Project-Graduated-green.svg)](https://docs.outscale.com/en/userguide/Open-Source-Projects.html)
 
 Outscale Driver plugin for docker-machine
 
